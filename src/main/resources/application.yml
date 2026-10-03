@@ -12,6 +12,33 @@ spring:
     locations: classpath:db/migration
   jackson:
     time-zone: UTC
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USERNAME:guest}
+    password: ${RABBITMQ_PASSWORD:guest}
+    publisher-confirm-type: correlated
+    publisher-returns: true
+    template:
+      mandatory: true
+    listener:
+      simple:
+        retry:
+          enabled: true
+          max-attempts: 5
+          initial-interval: 1s
+          max-interval: 10s
+          multiplier: 2
+        default-requeue-rejected: false
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+  cache:
+    type: redis
+    redis:
+      time-to-live: 10m
 mybatis-plus:
   configuration:
     map-underscore-to-camel-case: true
@@ -19,12 +46,20 @@ server:
   port: ${SERVER_PORT:8080}
   forward-headers-strategy: framework
 educore:
+  cache:
+    enabled: ${CACHE_ENABLED:true}
   jwt:
     secret: ${JWT_SECRET:}
     ttl-seconds: ${JWT_TTL_SECONDS:3600}
   bootstrap-admin:
     username: ${ADMIN_USERNAME:admin}
     password: ${ADMIN_PASSWORD:}
+  enrollment:
+    order-ttl-minutes: ${ORDER_TTL_MINUTES:30}
+    expiration-scan-ms: ${ORDER_EXPIRATION_SCAN_MS:60000}
+    expiration-enabled: ${ORDER_EXPIRATION_ENABLED:true}
+  messaging:
+    enabled: ${MESSAGING_ENABLED:true}
 springdoc:
   swagger-ui:
     path: /swagger-ui.html

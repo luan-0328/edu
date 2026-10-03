@@ -32,7 +32,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  "spring.datasource.url=jdbc:h2:mem:educore-phase2;MODE=MySQL;DB_CLOSE_DELAY=-1;LOCK_TIMEOUT=15000",
  "spring.datasource.driver-class-name=org.h2.Driver","spring.datasource.username=sa","spring.datasource.password=",
  "spring.datasource.hikari.connection-init-sql=","spring.flyway.enabled=false","spring.sql.init.mode=always",
- "spring.sql.init.schema-locations=classpath:schema.sql","educore.jwt.secret=phase-two-integration-test-secret-32-bytes-minimum","educore.jwt.ttl-seconds=3600"
+ "spring.sql.init.schema-locations=classpath:schema.sql","educore.jwt.secret=phase-two-integration-test-secret-32-bytes-minimum","educore.jwt.ttl-seconds=3600",
+ "educore.messaging.enabled=false","educore.enrollment.expiration-enabled=false","educore.cache.enabled=false"
 })
 @AutoConfigureMockMvc
 class ScheduleIntegrationTest {

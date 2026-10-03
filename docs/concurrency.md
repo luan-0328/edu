@@ -25,6 +25,21 @@ AND existing.end_time > :new_start_time
 
 资源行锁负责同一资源的并发串行；冲突查询锁定读负责在串行后检查最新数据。共享教师、教室、班级的所有排课路径必须遵循相同资源锁顺序。
 
+## 报名订单与名额
+
+创建订单事务使用 `READ COMMITTED`，并按顺序锁定当前学生 `sys_user` 行，再通过班级条件更新竞争名额。学生行锁串行同一学生的创建请求；锁内读取待支付订单和正式入班关系，复用有效订单或阻止重复入班。待支付订单和成员关系使用普通读，避免对不存在的索引键做范围锁后与不同学生的插入形成间隙锁死锁。READ COMMITTED 让每条语句读取最新已提交状态，因此若支付刚好完成，后续成员查询能看到同一事务写入的正式入班记录。名额通过条件更新原子预占：
+
+```sql
+UPDATE edu_class
+SET reserved_count = reserved_count + 1
+WHERE id = :class_id AND status = 'ENROLLING'
+  AND reserved_count + enrolled_count < capacity;
+```
+
+支付、取消和超时先 `SELECT ... FOR UPDATE` 锁订单，再更新班级名额；这些路径不锁学生行，避免与同学生的创建请求形成反向锁等待。支付事务同一提交写入支付流水、把预占计数转换为已报名计数、插入 `class_student` 并将订单改为 `PAID`。订单终态检查使重复支付/取消/超时不能重复改计数，唯一键提供幂等保护。
+
+超时 outbox 与订单在同一数据库事务提交。发布器在短事务中以 `FOR UPDATE SKIP LOCKED` 领取记录并设置租约，提交后才向 RabbitMQ 发送并等待 publisher confirm；确认后标记 SENT，失败则延时重试。崩溃导致的重复投递由消费日志唯一键和订单终态检查消重。RabbitMQ TTL/DLX 触发常规超时处理，MySQL UTC 到期扫描补偿消息丢失或服务暂停。
+
 ## 测试边界
 
 `ScheduleIntegrationTest` 使用 H2/MySQL 模式覆盖并发同教师排课、左闭右开边界、教师课表归属、班级状态和容量校验。测试不替代 MySQL 8 的真实并发验收；部署验收应在 MySQL 8 下重跑并查询最终 `class_schedule` 状态。

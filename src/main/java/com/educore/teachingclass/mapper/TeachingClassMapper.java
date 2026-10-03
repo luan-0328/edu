@@ -9,4 +9,7 @@ import org.apache.ibatis.annotations.Select;
  @Select("SELECT COUNT(*) FROM class_schedule WHERE class_id=#{classId} AND status='SCHEDULED'") long countScheduledLessons(@Param("classId") Long classId);
  @Select("SELECT COUNT(*) FROM class_schedule s JOIN classroom r ON r.id=s.classroom_id WHERE s.class_id=#{classId} AND s.status='SCHEDULED' AND r.capacity < #{capacity}") long countSchedulesWithSmallRoom(@Param("classId") Long classId,@Param("capacity") int capacity);
  @Select("SELECT COUNT(*) FROM class_schedule WHERE class_id=#{classId} AND status='SCHEDULED' AND (start_time < #{earliest} OR end_time > #{latest})") long countSchedulesOutsideDates(@Param("classId") Long classId,@Param("earliest") java.time.LocalDateTime earliest,@Param("latest") java.time.LocalDateTime latest);
+ @org.apache.ibatis.annotations.Update("UPDATE edu_class SET reserved_count=reserved_count+1 WHERE id=#{classId} AND status='ENROLLING' AND reserved_count+enrolled_count<capacity") int reserveEnrollmentSeat(@Param("classId") Long classId);
+ @org.apache.ibatis.annotations.Update("UPDATE edu_class SET reserved_count=reserved_count-1 WHERE id=#{classId} AND reserved_count>0") int releaseEnrollmentSeat(@Param("classId") Long classId);
+ @org.apache.ibatis.annotations.Update("UPDATE edu_class SET reserved_count=reserved_count-1,enrolled_count=enrolled_count+1 WHERE id=#{classId} AND status IN ('ENROLLING','IN_PROGRESS') AND reserved_count>0") int confirmEnrollmentSeat(@Param("classId") Long classId);
 }

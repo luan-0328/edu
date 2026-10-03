@@ -52,6 +52,13 @@ public class UserService {
         return user;
     }
     @Transactional(propagation=Propagation.MANDATORY)
+    public UserEntity lockActiveStudent(Long id){
+        UserEntity user=mapper.selectByIdForUpdate(id);
+        if(user==null || user.getRole()!=UserRole.STUDENT || user.getStatus()!=UserStatus.ACTIVE)
+            throw new BusinessException(ApiErrorCode.RESOURCE_UNAVAILABLE,"学生账号不存在或未启用",HttpStatus.FORBIDDEN);
+        return user;
+    }
+    @Transactional(propagation=Propagation.MANDATORY)
     public UserEntity lockTeacherRecord(Long id){UserEntity user=mapper.selectByIdForUpdate(id);if(user==null)throw new BusinessException(ApiErrorCode.RESOURCE_UNAVAILABLE,"教师不存在",HttpStatus.BAD_REQUEST);return user;}
     private UserEntity requireUser(Long id){UserEntity user=mapper.selectById(id);if(user==null)throw new BusinessException(ApiErrorCode.USER_NOT_FOUND,"用户不存在",HttpStatus.NOT_FOUND);return user;}
     private UserEntity create(String username,String password,String realName,UserRole role){

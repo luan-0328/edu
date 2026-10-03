@@ -1,4 +1,4 @@
-# EduCore API（阶段一、二）
+# EduCore API（阶段一至三）
 
 所有接口前缀为 `/api`。受保护请求添加 `Authorization: Bearer <JWT>`。统一响应：
 
@@ -65,6 +65,22 @@
 
 课次请求：`{"classId":1,"classroomId":1,"startTime":"2026-11-01T09:00:00","endTime":"2026-11-01T11:00:00"}`。`teacherId` 从班级当前主讲教师取得，不接受客户端指定。时间采用 UTC 的本地日期时间格式，区间为 `[startTime,endTime)`；结束时刻相接的课次不冲突。
 
+## 报名、订单与模拟支付
+
+| 方法 | 路径 | 权限 | 说明 |
+| --- | --- | --- | --- |
+| POST | `/api/enrollments/orders` | STUDENT | 为开放报名的班级创建/复用待支付订单并预占一个名额 |
+| GET | `/api/orders?page=1&size=20` | STUDENT | 查询当前学生的订单 |
+| GET | `/api/orders/{id}` | STUDENT | 查询本人订单；其他学生不能访问 |
+| POST | `/api/orders/{id}/pay` | STUDENT | 模拟支付；成功后正式入班，重复支付返回同一支付记录 |
+| POST | `/api/orders/{id}/cancel` | STUDENT | 取消本人待支付订单并释放一次名额 |
+| GET | `/api/students/me/classes` | STUDENT | 查询当前学生已正式加入的班级 |
+| GET | `/api/admin/orders?page=1&size=20&studentId=&classId=&status=` | ADMIN | 按学生、班级、状态筛选订单 |
+
+创建订单请求：`{"classId":1}`。订单有效时间由 `ORDER_TTL_MINUTES` 配置，默认 30 分钟。有效待支付订单重复创建时返回同一订单；已报名学生不能重复报名。只有模拟支付成功会新增 `class_student`，订单创建只增加 `reserved_count`。取消、超时释放预占，支付把 `reserved_count` 减一并将 `enrolled_count` 加一。已支付订单不能取消。
+
+RabbitMQ TTL/DLX 负责订单超时通知，周期补偿扫描处理 RabbitMQ 不可用或重复/延迟投递；时间判断以 MySQL `UTC_TIMESTAMP(3)` 为准。Redis 只缓存上架课程详情，名额判定完全使用数据库。
+
 ## 主要业务错误码
 
-`VALIDATION_ERROR`、`UNAUTHENTICATED`、`FORBIDDEN`、`COURSE_NOT_FOUND`、`CLASS_NOT_FOUND`、`CLASSROOM_NOT_FOUND`、`SCHEDULE_NOT_FOUND`、`INVALID_STATE`、`CAPACITY_EXCEEDED`、`RESOURCE_UNAVAILABLE`、`SCHEDULE_CONFLICT`。
+`VALIDATION_ERROR`、`UNAUTHENTICATED`、`FORBIDDEN`、`COURSE_NOT_FOUND`、`CLASS_NOT_FOUND`、`CLASSROOM_NOT_FOUND`、`SCHEDULE_NOT_FOUND`、`INVALID_STATE`、`CAPACITY_EXCEEDED`、`RESOURCE_UNAVAILABLE`、`SCHEDULE_CONFLICT`、`ORDER_NOT_FOUND`、`ORDER_OWNER_MISMATCH`、`ORDER_EXPIRED`、`ALREADY_ENROLLED`、`CLASS_FULL`、`INVALID_ORDER_STATE`。
