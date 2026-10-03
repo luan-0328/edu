@@ -3,6 +3,7 @@ package com.educore.enrollment.mapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.educore.enrollment.entity.ClassStudentEntity;
 import com.educore.enrollment.vo.StudentClassView;
+import com.educore.enrollment.vo.ClassMemberView;
 import org.apache.ibatis.annotations.*;
 import java.util.List;
 
@@ -21,4 +22,8 @@ public interface ClassStudentMapper extends BaseMapper<ClassStudentEntity> {
             @Arg(column="end_date", javaType=java.time.LocalDate.class), @Arg(column="enrolled_at", javaType=java.time.LocalDateTime.class)
     })
     List<StudentClassView> selectStudentClasses(@Param("studentId") Long studentId);
+
+    @Select("SELECT u.id AS student_id,u.username,u.real_name AS real_name,cs.enrolled_at FROM class_student cs JOIN sys_user u ON u.id=cs.student_id WHERE cs.class_id=#{classId} AND cs.status='ENROLLED' ORDER BY cs.enrolled_at,cs.student_id")
+    @ConstructorArgs({@Arg(column="student_id",javaType=Long.class),@Arg(column="username",javaType=String.class),@Arg(column="real_name",javaType=String.class),@Arg(column="enrolled_at",javaType=java.time.LocalDateTime.class)})
+    List<ClassMemberView> selectClassStudents(@Param("classId") Long classId);
 }

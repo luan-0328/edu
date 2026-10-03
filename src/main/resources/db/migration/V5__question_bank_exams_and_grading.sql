@@ -1,0 +1,100 @@
+CREATE TABLE question (
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    course_id BIGINT NOT NULL,
+    teacher_id BIGINT NOT NULL,
+    type VARCHAR(24) NOT NULL,
+    content TEXT NOT NULL,
+    options_json LONGTEXT NULL,
+    answer_json LONGTEXT NOT NULL,
+    difficulty VARCHAR(16) NOT NULL,
+    status VARCHAR(16) NOT NULL DEFAULT 'ACTIVE',
+    created_at DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    updated_at DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
+    PRIMARY KEY (id),
+    KEY idx_question_bank (course_id,teacher_id,type,difficulty,status,id),
+    CONSTRAINT fk_question_course FOREIGN KEY (course_id) REFERENCES course(id),
+    CONSTRAINT fk_question_teacher FOREIGN KEY (teacher_id) REFERENCES sys_user(id),
+    CONSTRAINT chk_question_type CHECK (type IN ('SINGLE_CHOICE','MULTIPLE_CHOICE','TRUE_FALSE','SHORT_ANSWER')),
+    CONSTRAINT chk_question_difficulty CHECK (difficulty IN ('EASY','MEDIUM','HARD')),
+    CONSTRAINT chk_question_status CHECK (status IN ('ACTIVE','INACTIVE'))
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE exam (
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    class_id BIGINT NOT NULL,
+    teacher_id BIGINT NOT NULL,
+    title VARCHAR(160) NOT NULL,
+    start_time DATETIME(3) NOT NULL,
+    end_time DATETIME(3) NOT NULL,
+    duration_minutes INT NOT NULL,
+    status VARCHAR(16) NOT NULL DEFAULT 'DRAFT',
+    created_at DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    updated_at DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
+    PRIMARY KEY (id),
+    KEY idx_exam_class_status_time (class_id,status,start_time),
+    KEY idx_exam_teacher_created (teacher_id,created_at),
+    CONSTRAINT fk_exam_class FOREIGN KEY (class_id) REFERENCES edu_class(id),
+    CONSTRAINT fk_exam_teacher FOREIGN KEY (teacher_id) REFERENCES sys_user(id),
+    CONSTRAINT chk_exam_time CHECK (start_time < end_time),
+    CONSTRAINT chk_exam_duration CHECK (duration_minutes > 0),
+    CONSTRAINT chk_exam_status CHECK (status IN ('DRAFT','PUBLISHED','CLOSED'))
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE exam_question (
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    exam_id BIGINT NOT NULL,
+    source_question_id BIGINT NOT NULL,
+    type VARCHAR(24) NOT NULL,
+    content_snapshot TEXT NOT NULL,
+    options_snapshot LONGTEXT NULL,
+    answer_snapshot LONGTEXT NOT NULL,
+    difficulty VARCHAR(16) NOT NULL,
+    score DECIMAL(6,2) NOT NULL,
+    sort_order INT NOT NULL,
+    created_at DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    PRIMARY KEY (id),
+    UNIQUE KEY uk_exam_source_question (exam_id,source_question_id),
+    UNIQUE KEY uk_exam_sort (exam_id,sort_order),
+    KEY idx_exam_question_exam (exam_id,id),
+    CONSTRAINT fk_exam_question_exam FOREIGN KEY (exam_id) REFERENCES exam(id),
+    CONSTRAINT fk_exam_question_source FOREIGN KEY (source_question_id) REFERENCES question(id),
+    CONSTRAINT chk_exam_question_score CHECK (score > 0),
+    CONSTRAINT chk_exam_question_type CHECK (type IN ('SINGLE_CHOICE','MULTIPLE_CHOICE','TRUE_FALSE','SHORT_ANSWER'))
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE exam_attempt (
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    exam_id BIGINT NOT NULL,
+    student_id BIGINT NOT NULL,
+    status VARCHAR(16) NOT NULL DEFAULT 'IN_PROGRESS',
+    started_at DATETIME(3) NOT NULL,
+    submitted_at DATETIME(3) NULL,
+    score DECIMAL(7,2) NULL,
+    created_at DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    updated_at DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
+    PRIMARY KEY (id),
+    UNIQUE KEY uk_exam_attempt_student (exam_id,student_id),
+    KEY idx_attempt_student_status (student_id,status),
+    CONSTRAINT fk_attempt_exam FOREIGN KEY (exam_id) REFERENCES exam(id),
+    CONSTRAINT fk_attempt_student FOREIGN KEY (student_id) REFERENCES sys_user(id),
+    CONSTRAINT chk_attempt_status CHECK (status IN ('IN_PROGRESS','SUBMITTED','GRADED')),
+    CONSTRAINT chk_attempt_score CHECK (score IS NULL OR score >= 0)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE exam_answer (
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    attempt_id BIGINT NOT NULL,
+    exam_question_id BIGINT NOT NULL,
+    answer_json LONGTEXT NULL,
+    score DECIMAL(6,2) NULL,
+    feedback TEXT NULL,
+    graded_at DATETIME(3) NULL,
+    created_at DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    updated_at DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
+    PRIMARY KEY (id),
+    UNIQUE KEY uk_answer_attempt_question (attempt_id,exam_question_id),
+    KEY idx_answer_exam_question (exam_question_id,attempt_id),
+    CONSTRAINT fk_answer_attempt FOREIGN KEY (attempt_id) REFERENCES exam_attempt(id),
+    CONSTRAINT fk_answer_exam_question FOREIGN KEY (exam_question_id) REFERENCES exam_question(id),
+    CONSTRAINT chk_exam_answer_score CHECK (score IS NULL OR score >= 0)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;

@@ -17,6 +17,7 @@ spring:
     port: ${RABBITMQ_PORT:5672}
     username: ${RABBITMQ_USERNAME:guest}
     password: ${RABBITMQ_PASSWORD:guest}
+    virtual-host: ${RABBITMQ_VHOST:/}
     publisher-confirm-type: correlated
     publisher-returns: true
     template:
@@ -60,6 +61,9 @@ educore:
     expiration-enabled: ${ORDER_EXPIRATION_ENABLED:true}
   messaging:
     enabled: ${MESSAGING_ENABLED:true}
+  exam:
+    expiration-enabled: ${EXAM_EXPIRATION_ENABLED:true}
+    expiration-scan-ms: ${EXAM_EXPIRATION_SCAN_MS:60000}
 springdoc:
   swagger-ui:
     path: /swagger-ui.html

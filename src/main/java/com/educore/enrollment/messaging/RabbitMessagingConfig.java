@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 @Configuration
 @EnableRabbit
@@ -25,6 +26,9 @@ public class RabbitMessagingConfig {
     public static final String TIMEOUT_ROUTING_KEY = "order.timeout";
     public static final String ERROR_EXCHANGE = "educore.events.dlx";
     public static final String ERROR_QUEUE = "educore.order.timeout.errors";
+    public static final String ASSIGNMENT_QUEUE = "educore.assignment.notification.queue";
+    public static final String ASSIGNMENT_ROUTING_KEY = "assignment.published";
+    public static final String NOTIFICATION_ERROR_ROUTING_KEY = "assignment.notification.failed";
 
     @Bean Jackson2JsonMessageConverter rabbitMessageConverter(ObjectMapper objectMapper) {
         return new Jackson2JsonMessageConverter(objectMapper);
@@ -43,7 +47,11 @@ public class RabbitMessagingConfig {
                 .withArgument("x-dead-letter-routing-key", "order.timeout.failed").build();
     }
     @Bean Queue errorQueue() { return QueueBuilder.durable(ERROR_QUEUE).build(); }
-    @Bean Binding delayBinding(Queue delayQueue, DirectExchange delayExchange) { return BindingBuilder.bind(delayQueue).to(delayExchange).with(DELAY_ROUTING_KEY); }
-    @Bean Binding timeoutBinding(Queue timeoutQueue, DirectExchange eventExchange) { return BindingBuilder.bind(timeoutQueue).to(eventExchange).with(TIMEOUT_ROUTING_KEY); }
-    @Bean Binding errorBinding(Queue errorQueue, DirectExchange errorExchange) { return BindingBuilder.bind(errorQueue).to(errorExchange).with("order.timeout.failed"); }
+    @Bean Queue assignmentQueue() { return QueueBuilder.durable(ASSIGNMENT_QUEUE).withArgument("x-dead-letter-exchange", ERROR_EXCHANGE).withArgument("x-dead-letter-routing-key", NOTIFICATION_ERROR_ROUTING_KEY).build(); }
+    @Bean Queue notificationErrorQueue() { return QueueBuilder.durable("educore.assignment.notification.errors").build(); }
+    @Bean Binding delayBinding(@Qualifier("delayQueue") Queue delayQueue,@Qualifier("delayExchange") DirectExchange delayExchange) { return BindingBuilder.bind(delayQueue).to(delayExchange).with(DELAY_ROUTING_KEY); }
+    @Bean Binding timeoutBinding(@Qualifier("timeoutQueue") Queue timeoutQueue,@Qualifier("eventExchange") DirectExchange eventExchange) { return BindingBuilder.bind(timeoutQueue).to(eventExchange).with(TIMEOUT_ROUTING_KEY); }
+    @Bean Binding errorBinding(@Qualifier("errorQueue") Queue errorQueue,@Qualifier("errorExchange") DirectExchange errorExchange) { return BindingBuilder.bind(errorQueue).to(errorExchange).with("order.timeout.failed"); }
+    @Bean Binding assignmentBinding(@Qualifier("assignmentQueue") Queue queue,@Qualifier("eventExchange") DirectExchange exchange) { return BindingBuilder.bind(queue).to(exchange).with(ASSIGNMENT_ROUTING_KEY); }
+    @Bean Binding notificationErrorBinding(@Qualifier("notificationErrorQueue") Queue queue,@Qualifier("errorExchange") DirectExchange exchange) { return BindingBuilder.bind(queue).to(exchange).with(NOTIFICATION_ERROR_ROUTING_KEY); }
 }

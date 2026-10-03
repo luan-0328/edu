@@ -27,3 +27,61 @@ CREATE TABLE class_schedule (
 CREATE INDEX idx_schedule_teacher_time ON class_schedule(teacher_id,status,start_time,end_time);
 CREATE INDEX idx_schedule_room_time ON class_schedule(classroom_id,status,start_time,end_time);
 CREATE INDEX idx_schedule_class_time ON class_schedule(class_id,status,start_time,end_time);
+CREATE TABLE class_student (
+ id BIGINT AUTO_INCREMENT PRIMARY KEY,class_id BIGINT NOT NULL,student_id BIGINT NOT NULL,status VARCHAR(16) NOT NULL DEFAULT 'ENROLLED',
+ enrolled_at TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP,created_at TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP,updated_at TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP,
+ CONSTRAINT uk_class_student UNIQUE(class_id,student_id),FOREIGN KEY(class_id) REFERENCES edu_class(id),FOREIGN KEY(student_id) REFERENCES sys_user(id)
+);
+CREATE TABLE message_outbox (
+ id BIGINT AUTO_INCREMENT PRIMARY KEY,event_type VARCHAR(64) NOT NULL,aggregate_type VARCHAR(64) NOT NULL,aggregate_id BIGINT NOT NULL,
+ dedupe_key VARCHAR(120) NOT NULL UNIQUE,payload CLOB NOT NULL,status VARCHAR(16) NOT NULL DEFAULT 'PENDING',attempts INT NOT NULL DEFAULT 0,
+ available_at TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP,locked_until TIMESTAMP(3),published_at TIMESTAMP(3),last_error VARCHAR(1000),
+ created_at TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP,updated_at TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TABLE message_consume_log (
+ id BIGINT AUTO_INCREMENT PRIMARY KEY,consumer_name VARCHAR(80) NOT NULL,event_id BIGINT NOT NULL,consumed_at TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP,
+ CONSTRAINT uk_consume_consumer_event UNIQUE(consumer_name,event_id),FOREIGN KEY(event_id) REFERENCES message_outbox(id)
+);
+CREATE TABLE attendance (
+ id BIGINT AUTO_INCREMENT PRIMARY KEY,schedule_id BIGINT NOT NULL,student_id BIGINT NOT NULL,status VARCHAR(16) NOT NULL,
+ checked_at TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP,created_at TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP,updated_at TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP,
+ CONSTRAINT uk_attendance_schedule_student UNIQUE(schedule_id,student_id),FOREIGN KEY(schedule_id) REFERENCES class_schedule(id),FOREIGN KEY(student_id) REFERENCES sys_user(id)
+);
+CREATE TABLE assignment (
+ id BIGINT AUTO_INCREMENT PRIMARY KEY,class_id BIGINT NOT NULL,teacher_id BIGINT NOT NULL,title VARCHAR(160) NOT NULL,content CLOB NOT NULL,
+ deadline TIMESTAMP(3) NOT NULL,status VARCHAR(16) NOT NULL DEFAULT 'DRAFT',created_at TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP,updated_at TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP,
+ FOREIGN KEY(class_id) REFERENCES edu_class(id),FOREIGN KEY(teacher_id) REFERENCES sys_user(id)
+);
+CREATE TABLE assignment_submission (
+ id BIGINT AUTO_INCREMENT PRIMARY KEY,assignment_id BIGINT NOT NULL,student_id BIGINT NOT NULL,content CLOB NOT NULL,status VARCHAR(16) NOT NULL DEFAULT 'SUBMITTED',
+ score DECIMAL(6,2),feedback CLOB,submitted_at TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP,graded_at TIMESTAMP(3),created_at TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP,updated_at TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP,
+ CONSTRAINT uk_submission_assignment_student UNIQUE(assignment_id,student_id),FOREIGN KEY(assignment_id) REFERENCES assignment(id),FOREIGN KEY(student_id) REFERENCES sys_user(id)
+);
+CREATE TABLE notification (
+ id BIGINT AUTO_INCREMENT PRIMARY KEY,user_id BIGINT NOT NULL,source_type VARCHAR(40) NOT NULL,source_id BIGINT NOT NULL,title VARCHAR(160) NOT NULL,content VARCHAR(500) NOT NULL,
+ read_at TIMESTAMP(3),created_at TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP,CONSTRAINT uk_notification_source_user UNIQUE(user_id,source_type,source_id),FOREIGN KEY(user_id) REFERENCES sys_user(id)
+);
+CREATE TABLE question (
+ id BIGINT AUTO_INCREMENT PRIMARY KEY,course_id BIGINT NOT NULL,teacher_id BIGINT NOT NULL,type VARCHAR(24) NOT NULL,content CLOB NOT NULL,options_json CLOB,answer_json CLOB NOT NULL,
+ difficulty VARCHAR(16) NOT NULL,status VARCHAR(16) NOT NULL DEFAULT 'ACTIVE',created_at TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP,updated_at TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP,
+ FOREIGN KEY(course_id) REFERENCES course(id),FOREIGN KEY(teacher_id) REFERENCES sys_user(id)
+);
+CREATE TABLE exam (
+ id BIGINT AUTO_INCREMENT PRIMARY KEY,class_id BIGINT NOT NULL,teacher_id BIGINT NOT NULL,title VARCHAR(160) NOT NULL,start_time TIMESTAMP(3) NOT NULL,end_time TIMESTAMP(3) NOT NULL,
+ duration_minutes INT NOT NULL,status VARCHAR(16) NOT NULL DEFAULT 'DRAFT',created_at TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP,updated_at TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP,
+ FOREIGN KEY(class_id) REFERENCES edu_class(id),FOREIGN KEY(teacher_id) REFERENCES sys_user(id)
+);
+CREATE TABLE exam_question (
+ id BIGINT AUTO_INCREMENT PRIMARY KEY,exam_id BIGINT NOT NULL,source_question_id BIGINT NOT NULL,type VARCHAR(24) NOT NULL,content_snapshot CLOB NOT NULL,
+ options_snapshot CLOB,answer_snapshot CLOB NOT NULL,difficulty VARCHAR(16) NOT NULL,score DECIMAL(6,2) NOT NULL,sort_order INT NOT NULL,created_at TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP,
+ CONSTRAINT uk_exam_source_question UNIQUE(exam_id,source_question_id),CONSTRAINT uk_exam_sort UNIQUE(exam_id,sort_order),FOREIGN KEY(exam_id) REFERENCES exam(id),FOREIGN KEY(source_question_id) REFERENCES question(id)
+);
+CREATE TABLE exam_attempt (
+ id BIGINT AUTO_INCREMENT PRIMARY KEY,exam_id BIGINT NOT NULL,student_id BIGINT NOT NULL,status VARCHAR(16) NOT NULL DEFAULT 'IN_PROGRESS',started_at TIMESTAMP(3) NOT NULL,
+ submitted_at TIMESTAMP(3),score DECIMAL(7,2),created_at TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP,updated_at TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP,
+ CONSTRAINT uk_exam_attempt_student UNIQUE(exam_id,student_id),FOREIGN KEY(exam_id) REFERENCES exam(id),FOREIGN KEY(student_id) REFERENCES sys_user(id)
+);
+CREATE TABLE exam_answer (
+ id BIGINT AUTO_INCREMENT PRIMARY KEY,attempt_id BIGINT NOT NULL,exam_question_id BIGINT NOT NULL,answer_json CLOB,score DECIMAL(6,2),feedback CLOB,graded_at TIMESTAMP(3),created_at TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP,updated_at TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP,
+ CONSTRAINT uk_answer_attempt_question UNIQUE(attempt_id,exam_question_id),FOREIGN KEY(attempt_id) REFERENCES exam_attempt(id),FOREIGN KEY(exam_question_id) REFERENCES exam_question(id)
+);

@@ -17,6 +17,7 @@ public class CourseController {
  @PutMapping("/api/admin/courses/{id}") public Result<CourseView> update(@PathVariable @Min(1) Long id,@Valid @RequestBody SaveCourseRequest req,HttpServletRequest r){return Result.success(service.update(id,req),rid(r));}
  @PatchMapping("/api/admin/courses/{id}/status") public Result<CourseView> status(@PathVariable @Min(1) Long id,@Valid @RequestBody CourseStatusRequest req,HttpServletRequest r){return Result.success(service.updateStatus(id,req.status()),rid(r));}
  @GetMapping("/api/courses") public Result<PageView<CourseView>> list(@RequestParam(defaultValue="1") @Min(1) long page,@RequestParam(defaultValue="20") @Min(1) @Max(100) long size,HttpServletRequest r){return Result.success(service.listPublished(page,size),rid(r));}
+ @GetMapping("/api/admin/courses") public Result<PageView<CourseView>> adminList(@RequestParam(defaultValue="1") @Min(1) long page,@RequestParam(defaultValue="20") @Min(1) @Max(100) long size,HttpServletRequest r){return Result.success(service.listAdmin(page,size),rid(r));}
  @GetMapping("/api/courses/{id}") public Result<CourseView> detail(@PathVariable @Min(1) Long id,HttpServletRequest r){return Result.success(service.detailPublished(id),rid(r));}
  private String rid(HttpServletRequest r){return String.valueOf(r.getAttribute("requestId"));}
 }

@@ -17,6 +17,10 @@ import com.educore.teachingclass.vo.TeachingClassView;
 import com.educore.user.entity.UserEntity;
 import com.educore.user.enums.UserRole;
 import com.educore.user.service.UserService;
+import com.educore.enrollment.mapper.ClassStudentMapper;
+import com.educore.enrollment.vo.ClassMemberView;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.educore.common.PageView;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,8 +30,8 @@ import java.util.List;
 import java.util.TreeSet;
 
 @Service public class TeachingClassService {
- private final TeachingClassMapper mapper;private final CourseService courses;private final UserService users;private final ScheduleService schedules;
- public TeachingClassService(TeachingClassMapper mapper,CourseService courses,UserService users,ScheduleService schedules){this.mapper=mapper;this.courses=courses;this.users=users;this.schedules=schedules;}
+ private final TeachingClassMapper mapper;private final CourseService courses;private final UserService users;private final ScheduleService schedules;private final ClassStudentMapper memberships;
+ public TeachingClassService(TeachingClassMapper mapper,CourseService courses,UserService users,ScheduleService schedules,ClassStudentMapper memberships){this.mapper=mapper;this.courses=courses;this.users=users;this.schedules=schedules;this.memberships=memberships;}
  @Transactional public TeachingClassView create(SaveClassRequest request){
   validateDates(request.startDate(),request.endDate());courses.lockCourse(request.courseId());users.lockActiveTeacher(request.teacherId());
   TeachingClassEntity e=new TeachingClassEntity();apply(e,request);e.setReservedCount(0);e.setEnrolledCount(0);e.setStatus(ClassStatus.DRAFT);mapper.insert(e);return TeachingClassView.from(e);
@@ -65,6 +69,9 @@ import java.util.TreeSet;
   e.setStatus(target);mapper.updateById(e);if(target==ClassStatus.CANCELLED)schedules.cancelScheduledForClass(id);return TeachingClassView.from(e);
  }
  public TeachingClassView detail(Long id){return TeachingClassView.from(requireClass(id));}
+ public PageView<TeachingClassView> listAdmin(long page,long size){Page<TeachingClassEntity> p=mapper.selectPage(new Page<>(page,size),new LambdaQueryWrapper<TeachingClassEntity>().orderByDesc(TeachingClassEntity::getCreatedAt).orderByDesc(TeachingClassEntity::getId));return PageView.from(p,p.getRecords().stream().map(TeachingClassView::from).toList());}
+ public List<TeachingClassView> openByCourse(Long courseId){return mapper.selectList(new LambdaQueryWrapper<TeachingClassEntity>().eq(TeachingClassEntity::getCourseId,courseId).eq(TeachingClassEntity::getStatus,ClassStatus.ENROLLING).orderByAsc(TeachingClassEntity::getStartDate)).stream().map(TeachingClassView::from).toList();}
+ public List<ClassMemberView> students(Long classId,AuthenticatedUser actor){if(actor==null||actor.role()!=UserRole.TEACHER)throw new BusinessException(ApiErrorCode.FORBIDDEN,"仅教师可以查询班级学生",HttpStatus.FORBIDDEN);if(mapper.selectCount(new LambdaQueryWrapper<TeachingClassEntity>().eq(TeachingClassEntity::getId,classId).eq(TeachingClassEntity::getTeacherId,actor.id()))==0)throw new BusinessException(ApiErrorCode.FORBIDDEN,"只能查询自己所授班级的学生",HttpStatus.FORBIDDEN);return memberships.selectClassStudents(classId);}
  public List<TeachingClassView> teacherClasses(AuthenticatedUser actor){
   if(actor.role()!=UserRole.TEACHER)throw new BusinessException(ApiErrorCode.FORBIDDEN,"仅教师可以查询所授班级",HttpStatus.FORBIDDEN);
   return mapper.selectList(new LambdaQueryWrapper<TeachingClassEntity>().eq(TeachingClassEntity::getTeacherId,actor.id()).orderByDesc(TeachingClassEntity::getStartDate).orderByDesc(TeachingClassEntity::getId)).stream().map(TeachingClassView::from).toList();

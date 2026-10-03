@@ -6,6 +6,8 @@ import com.educore.enrollment.entity.EnrollmentOrderEntity;
 import com.educore.enrollment.entity.MessageOutboxEntity;
 import com.educore.enrollment.mapper.MessageOutboxMapper;
 import com.educore.enrollment.messaging.OrderTimeoutEvent;
+import com.educore.enrollment.messaging.AssignmentPublishedEvent;
+import com.educore.assignment.entity.AssignmentEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,6 +30,18 @@ public class MessageOutboxService {
         } catch (JsonProcessingException e) {
             throw new IllegalStateException("Could not serialize order timeout event", e);
         }
+        mapper.updateById(row);
+    }
+
+    @Transactional(propagation = Propagation.MANDATORY)
+    public void enqueueAssignmentPublished(AssignmentEntity assignment) {
+        MessageOutboxEntity row = new MessageOutboxEntity();
+        row.setEventType("ASSIGNMENT_PUBLISHED"); row.setAggregateType("ASSIGNMENT"); row.setAggregateId(assignment.getId());
+        row.setDedupeKey("assignment-published:" + assignment.getId()); row.setPayload("{}"); row.setStatus("PENDING"); row.setAttempts(0);
+        mapper.insert(row);
+        try {
+            row.setPayload(objectMapper.writeValueAsString(new AssignmentPublishedEvent(row.getId(), assignment.getId(), assignment.getClassId(), assignment.getTitle())));
+        } catch (JsonProcessingException e) { throw new IllegalStateException("Could not serialize assignment event", e); }
         mapper.updateById(row);
     }
 

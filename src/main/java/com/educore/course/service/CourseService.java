@@ -28,6 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
   e.setStatus(status);mapper.updateById(e);events.publishEvent(new CourseChangedEvent(id));return CourseView.from(e);
  }
  public PageView<CourseView> listPublished(long page,long size){Page<CourseEntity> p=mapper.selectPage(new Page<>(page,size),new LambdaQueryWrapper<CourseEntity>().eq(CourseEntity::getStatus,CourseStatus.PUBLISHED).orderByDesc(CourseEntity::getCreatedAt).orderByDesc(CourseEntity::getId));return PageView.from(p,p.getRecords().stream().map(CourseView::from).toList());}
+ public PageView<CourseView> listAdmin(long page,long size){Page<CourseEntity> p=mapper.selectPage(new Page<>(page,size),new LambdaQueryWrapper<CourseEntity>().orderByDesc(CourseEntity::getCreatedAt).orderByDesc(CourseEntity::getId));return PageView.from(p,p.getRecords().stream().map(CourseView::from).toList());}
  @Cacheable(cacheNames="publishedCourses",key="#id") public CourseView detailPublished(Long id){CourseEntity e=mapper.selectOne(new LambdaQueryWrapper<CourseEntity>().eq(CourseEntity::getId,id).eq(CourseEntity::getStatus,CourseStatus.PUBLISHED));if(e==null)throw notFound();return CourseView.from(e);}
  @Transactional(propagation=Propagation.MANDATORY) public CourseEntity lockCourse(Long id){CourseEntity e=mapper.selectByIdForUpdate(id);if(e==null)throw notFound();return e;}
  private BusinessException notFound(){return new BusinessException(ApiErrorCode.COURSE_NOT_FOUND,"课程不存在",HttpStatus.NOT_FOUND);}
