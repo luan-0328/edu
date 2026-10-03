@@ -21,6 +21,21 @@ EduCore 是面向中小型培训机构的 Java 后端教培管理系统，采用
 - Vue 3、TypeScript、Vite、Pinia、Element Plus
 - JUnit 5、Mockito、Spring Boot Test、H2
 
+## 后端代码分层
+
+Controller、Service、Mapper 按层统一放置，并在每层保留业务域子包；DTO、Entity、枚举和 VO 仍按业务域归档：
+
+```text
+com.educore
+├── controller/{user,course,teachingclass,enrollment,...}
+├── service/{user,course,teachingclass,enrollment,...}
+├── mapper/{user,course,teachingclass,enrollment,...}
+├── config/                 # Spring、MyBatis、缓存、RabbitMQ 等配置
+├── common/                 # 统一响应、异常码、分页、requestId
+├── security/               # JWT 认证
+└── {user,course,enrollment,...}/{dto,entity,enums,vo,messaging}
+```
+
 ## 环境要求
 
 需要 JDK 21、Maven 3.9+、MySQL 8、Redis、RabbitMQ、Node.js 24+ 和 npm。先创建 MySQL 数据库：

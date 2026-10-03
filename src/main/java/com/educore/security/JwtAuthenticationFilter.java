@@ -2,7 +2,7 @@ package com.educore.security;
 
 import com.educore.user.entity.UserEntity;
 import com.educore.user.enums.UserStatus;
-import com.educore.user.service.UserService;
+import com.educore.service.user.UserService;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

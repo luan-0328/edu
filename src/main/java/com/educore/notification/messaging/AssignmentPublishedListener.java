@@ -1,8 +1,8 @@
 package com.educore.notification.messaging;
 
 import com.educore.enrollment.messaging.AssignmentPublishedEvent;
-import com.educore.enrollment.messaging.RabbitMessagingConfig;
-import com.educore.notification.service.NotificationService;
+import com.educore.config.messaging.RabbitMessagingConfig;
+import com.educore.service.notification.NotificationService;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;

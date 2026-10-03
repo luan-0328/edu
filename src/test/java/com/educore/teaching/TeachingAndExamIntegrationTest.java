@@ -1,15 +1,15 @@
 package com.educore.teaching;
 
 import com.educore.assignment.dto.*;
-import com.educore.assignment.service.AssignmentService;
+import com.educore.service.assignment.AssignmentService;
 import com.educore.attendance.dto.*;
 import com.educore.attendance.enums.AttendanceStatus;
-import com.educore.attendance.service.AttendanceService;
+import com.educore.service.attendance.AttendanceService;
 import com.educore.common.BusinessException;
 import com.educore.examination.dto.*;
 import com.educore.examination.enums.*;
-import com.educore.examination.service.ExaminationService;
-import com.educore.notification.service.NotificationService;
+import com.educore.service.examination.ExaminationService;
+import com.educore.service.notification.NotificationService;
 import com.educore.security.AuthenticatedUser;
 import com.educore.security.JwtService;
 import com.educore.user.entity.UserEntity;

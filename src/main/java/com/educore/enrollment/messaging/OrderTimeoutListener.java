@@ -1,6 +1,7 @@
 package com.educore.enrollment.messaging;
 
-import com.educore.enrollment.service.EnrollmentService;
+import com.educore.config.messaging.RabbitMessagingConfig;
+import com.educore.service.enrollment.EnrollmentService;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;

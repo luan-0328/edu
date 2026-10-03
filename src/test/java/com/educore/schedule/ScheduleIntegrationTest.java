@@ -2,14 +2,14 @@ package com.educore.schedule;
 
 import com.educore.common.BusinessException;
 import com.educore.schedule.dto.SaveScheduleRequest;
-import com.educore.schedule.service.ScheduleService;
+import com.educore.service.schedule.ScheduleService;
 import com.educore.security.JwtService;
 import com.educore.course.dto.SaveCourseRequest;
 import com.educore.course.enums.CourseStatus;
-import com.educore.course.service.CourseService;
+import com.educore.service.course.CourseService;
 import com.educore.teachingclass.dto.SaveClassRequest;
 import com.educore.teachingclass.enums.ClassStatus;
-import com.educore.teachingclass.service.TeachingClassService;
+import com.educore.service.teachingclass.TeachingClassService;
 import com.educore.user.entity.UserEntity;
 import com.educore.user.enums.UserRole;
 import org.junit.jupiter.api.BeforeEach;

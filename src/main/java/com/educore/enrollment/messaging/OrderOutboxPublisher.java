@@ -1,8 +1,9 @@
 package com.educore.enrollment.messaging;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.educore.config.messaging.RabbitMessagingConfig;
 import com.educore.enrollment.entity.MessageOutboxEntity;
-import com.educore.enrollment.service.MessageOutboxService;
+import com.educore.service.enrollment.MessageOutboxService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.MessageDeliveryMode;
