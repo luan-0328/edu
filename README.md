@@ -1,21 +1,32 @@
 # EduCore 教培管理平台
 
-当前仓库实现开发执行方案的**第一阶段：基础工程与用户权限**。系统采用 Spring Boot 模块化单体结构，API 前缀为 `/api`。后续课程、报名、教学和考试业务尚未实现。
+EduCore 是面向中小型培训机构的 Java 后端管理系统，采用 Spring Boot 模块化单体架构，所有业务 API 使用 `/api` 前缀。
+
+## 已实现阶段
+
+- **第一阶段：基础工程与用户权限**：注册、登录、JWT 认证、角色权限、个人信息、教师账号和用户状态管理。
+- **第二阶段：课程、班级与排课**：课程/班级/教室管理，教师分配，课次创建修改及并发安全的排课冲突检查。
+
+报名订单、考勤、作业、考试、前端和部署仍属于后续阶段，尚未实现。当前不使用 Docker。
 
 ## 技术栈
 
-- Java 21、Spring Boot 3.5.5、Spring Security
-- MyBatis-Plus、MySQL 8、Flyway
-- JWT（JJWT）、BCrypt、Spring Validation、SpringDoc OpenAPI
-- JUnit 5、Mockito、Spring Boot Test
+- Java 21、Spring Boot 3.5.5、Spring Security、JWT（JJWT）
+- MyBatis-Plus、MySQL 8、Flyway、HikariCP
+- Spring Validation、SpringDoc OpenAPI
+- JUnit 5、Mockito、Spring Boot Test、H2（测试）
 
-## 环境配置
+## 环境与启动
 
-需要 JDK 21、Maven 3.9+ 和 MySQL 8。数据库需预先创建，例如 `CREATE DATABASE educore CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;`。Flyway 会自动创建 `sys_user` 表。
+需要 JDK 21、Maven 3.9+ 和 MySQL 8。预先创建数据库：
 
-复制 `.env.example` 为 `.env`，设置 `DB_URL`、`DB_USERNAME`、`DB_PASSWORD`、至少 32 字节的随机 `JWT_SECRET`。Spring Boot 不会自动读取 `.env` 文件；请在启动 shell/IDE 中导出这些环境变量。可选设置 `ADMIN_USERNAME` 和 `ADMIN_PASSWORD` 创建演示管理员。若未设置 `ADMIN_PASSWORD`，初始化器跳过建管，且不会写入任何默认密码。不要将 `.env` 提交到版本库。
+```sql
+CREATE DATABASE educore CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
+```
 
-Windows PowerShell 示例：
+设置 `DB_URL`、`DB_USERNAME`、`DB_PASSWORD`、至少 32 字节随机值的 `JWT_SECRET`。可选设置 `ADMIN_USERNAME` 和 `ADMIN_PASSWORD` 初始化演示管理员；未提供密码时初始化器跳过，不会使用默认密码。Spring Boot 不自动读取 `.env`，请在 shell 或 IDE 中设置变量。`.env` 已加入 `.gitignore`，不要提交真实凭据。
+
+PowerShell 示例：
 
 ```powershell
 $env:DB_URL = 'jdbc:mysql://localhost:3306/educore?useUnicode=true&characterEncoding=utf8&serverTimezone=UTC'
@@ -23,42 +34,31 @@ $env:DB_USERNAME = 'educore'
 $env:DB_PASSWORD = '本机数据库密码'
 $env:JWT_SECRET = '请替换成至少32字节的随机秘密'
 $env:ADMIN_USERNAME = 'admin'
-$env:ADMIN_PASSWORD = '请使用本机演示密码'
+$env:ADMIN_PASSWORD = '请设置本机管理员密码'
 mvn spring-boot:run
 ```
 
-应用启动成功后，OpenAPI UI 地址为 `http://localhost:8080/swagger-ui.html`。
+Flyway 启动时按顺序执行 `V1`（用户表）和 `V2`（课程、班级、教室、排课表）。成功启动后，接口文档 UI 为 `http://localhost:8080/swagger-ui.html`。
 
-## 第一阶段接口
+## API 文档
 
-| 方法 | 路径 | 权限 |
-|---|---|---|
-| POST | `/api/auth/register` | 公开，注册为 STUDENT |
-| POST | `/api/auth/login` | 公开 |
-| GET | `/api/users/me` | 已登录 |
-| PUT | `/api/users/me` | 已登录 |
-| POST | `/api/admin/teachers` | ADMIN |
-| GET | `/api/admin/users?page=1&size=20` | ADMIN |
-| PATCH | `/api/admin/users/{id}/status` | ADMIN |
+详见 [docs/api.md](docs/api.md)。所有响应包含 `code`、`message`、`data`、`requestId`；传入 `X-Request-Id` 可指定请求 ID。JWT 使用 `Authorization: Bearer <token>`。
 
-请求体示例：注册 `{"username":"student01","password":"Password123","realName":"张三"}`；登录 `{"username":"student01","password":"Password123"}`；状态更新 `{"status":"DISABLED"}`。登录响应提供 Bearer JWT。统一响应结构为 `code`、`message`、`data`、`requestId`；`X-Request-Id` 可由调用方传入或由服务生成。
-
-## 构建和测试
+## 测试
 
 ```shell
 mvn clean verify
 ```
 
-单元测试不依赖数据库。应用启动和 Flyway 集成验证需要可访问的 MySQL 8。
+单元测试与 H2 集成测试无需 MySQL。集成场景覆盖并发排课及教师数据权限；H2 与 MySQL 锁行为并不完全相同，真实 MySQL 的 Flyway、启动和并发行为仍需在 MySQL 8 环境验收。
 
-## 数据库和安全说明
+## 数据与业务规则
 
-`src/main/resources/db/migration/V1__create_sys_user.sql` 创建用户表，使用自增 BIGINT、唯一用户名、角色/状态检查约束和 `DATETIME(3)` UTC 时间字段。管理员初始化从 `ADMIN_PASSWORD` 环境变量读取并通过 BCrypt 哈希后入库，SQL 中不含账户密码。
+- 数据库时间使用 UTC，业务时间字段为 `DATETIME(3)`。
+- 课程与教学班分离；班级预留 `reserved_count`、`enrolled_count`，本阶段不开放报名写入。
+- 教室容量不得低于已有排课班级容量；教师端查询从 JWT 身份取得当前教师 ID。
+- 课程只能在上架后开放班级报名；容量不得小于已预占与已报名人数。
+- 排课采用左闭右开区间。事务按教师 ID、教室 ID、班级 ID 的固定顺序加锁，再以锁定读重查冲突。
+- 课程及历史排课不提供物理删除接口。
 
-每次携带 JWT 的受保护请求都会按用户 ID 重新读取用户，使用数据库中的当前角色授权；禁用账号的旧 Token 会立即失效。JWT 内含用户 ID、签发时间和过期时间。密码字段不会通过用户 VO 返回。
-
-## 当前阶段限制
-
-- 当前未提供 Docker Compose、Redis、RabbitMQ 或前端，这些属于后续阶段。
-- 此阶段没有 MySQL 集成测试配置；需在本机 MySQL 可用后验证真实迁移和启动流程。
-- 接口权限由 Spring Security 路径规则执行：`/api/admin/**` 仅 ADMIN，其余受保护 API 需认证。
+数据库结构见 [docs/database.md](docs/database.md)，排课加锁设计见 [docs/concurrency.md](docs/concurrency.md)。

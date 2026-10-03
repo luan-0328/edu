@@ -25,7 +25,7 @@ public class SecurityConfig {
         http.csrf(csrf->csrf.disable()).formLogin(form->form.disable()).httpBasic(basic->basic.disable())
                 .sessionManagement(s->s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth->auth.requestMatchers("/api/auth/register","/api/auth/login","/swagger-ui.html","/swagger-ui/**","/v3/api-docs/**").permitAll()
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN").anyRequest().authenticated())
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN").requestMatchers("/api/teacher/**").hasRole("TEACHER").anyRequest().authenticated())
                 .exceptionHandling(errors->errors.authenticationEntryPoint((request,response,ex)->writeError(request,response,mapper,ApiErrorCode.UNAUTHENTICATED,"请先登录",401))
                         .accessDeniedHandler((request,response,ex)->writeError(request,response,mapper,ApiErrorCode.FORBIDDEN,"无权执行此操作",403)))
                 .addFilterBefore(requestIdFilter,UsernamePasswordAuthenticationFilter.class)

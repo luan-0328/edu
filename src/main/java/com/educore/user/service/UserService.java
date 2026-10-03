@@ -16,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.annotation.Propagation;
 
 @Service
 public class UserService {
@@ -38,10 +39,20 @@ public class UserService {
         Page<UserView> view=new Page<>(result.getCurrent(),result.getSize(),result.getTotal());view.setRecords(result.getRecords().stream().map(UserView::from).toList());return view;
     }
     @Transactional public UserView updateStatus(Long id,UserStatus status,Long operatorId){
-        UserEntity target=requireUser(id); if(target.getRole()==UserRole.ADMIN && target.getId().equals(operatorId) && status==UserStatus.DISABLED) throw new BusinessException(ApiErrorCode.FORBIDDEN,"不能禁用当前管理员账号",HttpStatus.FORBIDDEN);
+        UserEntity target=mapper.selectByIdForUpdate(id);if(target==null)throw new BusinessException(ApiErrorCode.USER_NOT_FOUND,"用户不存在",HttpStatus.NOT_FOUND);
+        if(target.getRole()==UserRole.ADMIN && target.getId().equals(operatorId) && status==UserStatus.DISABLED) throw new BusinessException(ApiErrorCode.FORBIDDEN,"不能禁用当前管理员账号",HttpStatus.FORBIDDEN);
         target.setStatus(status);mapper.updateById(target);return UserView.from(target);
     }
     public UserEntity requireActiveUser(Long id){UserEntity user=requireUser(id);if(user.getStatus()!=UserStatus.ACTIVE)throw new BusinessException(ApiErrorCode.USER_DISABLED,"账号已被禁用",HttpStatus.UNAUTHORIZED);return user;}
+    @Transactional(propagation=Propagation.MANDATORY)
+    public UserEntity lockActiveTeacher(Long id){
+        UserEntity user=lockTeacherRecord(id);
+        if(user.getRole()!=UserRole.TEACHER || user.getStatus()!=UserStatus.ACTIVE)
+            throw new BusinessException(ApiErrorCode.RESOURCE_UNAVAILABLE,"教师不存在或未启用",HttpStatus.BAD_REQUEST);
+        return user;
+    }
+    @Transactional(propagation=Propagation.MANDATORY)
+    public UserEntity lockTeacherRecord(Long id){UserEntity user=mapper.selectByIdForUpdate(id);if(user==null)throw new BusinessException(ApiErrorCode.RESOURCE_UNAVAILABLE,"教师不存在",HttpStatus.BAD_REQUEST);return user;}
     private UserEntity requireUser(Long id){UserEntity user=mapper.selectById(id);if(user==null)throw new BusinessException(ApiErrorCode.USER_NOT_FOUND,"用户不存在",HttpStatus.NOT_FOUND);return user;}
     private UserEntity create(String username,String password,String realName,UserRole role){
         if(mapper.selectCount(new LambdaQueryWrapper<UserEntity>().eq(UserEntity::getUsername,username))>0)throw new BusinessException(ApiErrorCode.USERNAME_TAKEN,"用户名已存在",HttpStatus.CONFLICT);

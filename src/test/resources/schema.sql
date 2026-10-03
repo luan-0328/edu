@@ -1,0 +1,29 @@
+CREATE TABLE sys_user (
+ id BIGINT AUTO_INCREMENT PRIMARY KEY, username VARCHAR(64) NOT NULL UNIQUE, password_hash VARCHAR(100) NOT NULL,
+ real_name VARCHAR(64) NOT NULL, role VARCHAR(16) NOT NULL, status VARCHAR(16) NOT NULL DEFAULT 'ACTIVE',
+ created_at TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP, updated_at TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TABLE course (
+ id BIGINT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(120) NOT NULL, description CLOB, price DECIMAL(10,2) NOT NULL,
+ status VARCHAR(16) NOT NULL DEFAULT 'DRAFT', created_at TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP, updated_at TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TABLE edu_class (
+ id BIGINT AUTO_INCREMENT PRIMARY KEY, course_id BIGINT NOT NULL, teacher_id BIGINT NOT NULL, name VARCHAR(120) NOT NULL,
+ capacity INT NOT NULL, reserved_count INT NOT NULL DEFAULT 0, enrolled_count INT NOT NULL DEFAULT 0,
+ start_date DATE NOT NULL, end_date DATE NOT NULL, status VARCHAR(16) NOT NULL DEFAULT 'DRAFT',
+ created_at TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP, updated_at TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP,
+ FOREIGN KEY (course_id) REFERENCES course(id), FOREIGN KEY (teacher_id) REFERENCES sys_user(id)
+);
+CREATE TABLE classroom (
+ id BIGINT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(120) NOT NULL UNIQUE, capacity INT NOT NULL, status VARCHAR(16) NOT NULL DEFAULT 'ACTIVE',
+ created_at TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP, updated_at TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TABLE class_schedule (
+ id BIGINT AUTO_INCREMENT PRIMARY KEY, class_id BIGINT NOT NULL, teacher_id BIGINT NOT NULL, classroom_id BIGINT NOT NULL,
+ start_time TIMESTAMP(3) NOT NULL, end_time TIMESTAMP(3) NOT NULL, status VARCHAR(16) NOT NULL DEFAULT 'SCHEDULED',
+ created_at TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP, updated_at TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP,
+ FOREIGN KEY (class_id) REFERENCES edu_class(id), FOREIGN KEY (teacher_id) REFERENCES sys_user(id), FOREIGN KEY (classroom_id) REFERENCES classroom(id)
+);
+CREATE INDEX idx_schedule_teacher_time ON class_schedule(teacher_id,status,start_time,end_time);
+CREATE INDEX idx_schedule_room_time ON class_schedule(classroom_id,status,start_time,end_time);
+CREATE INDEX idx_schedule_class_time ON class_schedule(class_id,status,start_time,end_time);
