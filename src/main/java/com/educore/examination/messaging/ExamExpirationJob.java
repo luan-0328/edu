@@ -1,6 +1,6 @@
 package com.educore.examination.messaging;
 
-import com.educore.service.examination.ExaminationService;
+import com.educore.examination.service.ExaminationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;

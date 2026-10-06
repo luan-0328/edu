@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.educore.dashboard.mapper.ClassAnalyticsMapper">
+
+    <resultMap id="classMetricsMap" type="com.educore.dashboard.mapper.ClassAnalyticsMapper$ClassMetrics">
+        <constructor>
+            <idArg column="class_id" javaType="java.lang.Long"/>
+            <arg column="class_name" javaType="java.lang.String"/>
+            <arg column="status" javaType="java.lang.String"/>
+            <arg column="planned_lessons" javaType="java.lang.Long"/>
+            <arg column="completed_lessons" javaType="java.lang.Long"/>
+            <arg column="attendance_rate" javaType="java.math.BigDecimal"/>
+            <arg column="assignment_completion_rate" javaType="java.math.BigDecimal"/>
+            <arg column="average_score" javaType="java.math.BigDecimal"/>
+            <arg column="highest_score" javaType="java.math.BigDecimal"/>
+            <arg column="lowest_score" javaType="java.math.BigDecimal"/>
+            <arg column="exam_pass_rate" javaType="java.math.BigDecimal"/>
+        </constructor>
+    </resultMap>
+
+    <resultMap id="examAnalyticsMap" type="com.educore.dashboard.entity.vo.ExamAnalyticsView">
+        <constructor>
+            <idArg column="exam_id" javaType="java.lang.Long"/>
+            <arg column="title" javaType="java.lang.String"/>
+            <arg column="graded_attempt_count" javaType="java.lang.Long"/>
+            <arg column="average_score" javaType="java.math.BigDecimal"/>
+            <arg column="highest_score" javaType="java.math.BigDecimal"/>
+            <arg column="lowest_score" javaType="java.math.BigDecimal"/>
+            <arg column="pass_rate" javaType="java.math.BigDecimal"/>
+        </constructor>
+    </resultMap>
+
+    <resultMap id="studentExamHistoryMap" type="com.educore.dashboard.entity.vo.StudentExamHistoryView">
+        <constructor>
+            <idArg column="student_id" javaType="java.lang.Long"/>
+            <arg column="student_name" javaType="java.lang.String"/>
+            <arg column="exam_id" javaType="java.lang.Long"/>
+            <arg column="exam_title" javaType="java.lang.String"/>
+            <arg column="score" javaType="java.math.BigDecimal"/>
+            <arg column="submitted_at" javaType="java.time.LocalDateTime"/>
+        </constructor>
+    </resultMap>
+
+    <select id="classMetrics" resultMap="classMetricsMap">
+        SELECT ec.id AS class_id,
+               ec.name AS class_name,
+               ec.status,
+               (SELECT COUNT(*)
+                  FROM class_schedule s
+                 WHERE s.class_id = ec.id
+                   AND s.status IN ('SCHEDULED', 'COMPLETED')) AS planned_lessons,
+               (SELECT COUNT(*)
+                  FROM class_schedule s
+                 WHERE s.class_id = ec.id
+                   AND s.status = 'COMPLETED') AS completed_lessons,
+               CASE
+                   WHEN (SELECT COUNT(*) FROM class_schedule s WHERE s.class_id = ec.id AND s.status = 'COMPLETED') = 0
+                     OR (SELECT COUNT(*) FROM class_student cs WHERE cs.class_id = ec.id AND cs.status = 'ENROLLED') = 0
+                   THEN 0
+                   ELSE ROUND(100.0 *
+                       (SELECT COUNT(*)
+                          FROM class_schedule s
+                          JOIN attendance a ON a.schedule_id = s.id AND a.status IN ('PRESENT', 'LATE')
+                          JOIN class_student cs ON cs.class_id = s.class_id AND cs.student_id = a.student_id AND cs.status = 'ENROLLED'
+                         WHERE s.class_id = ec.id AND s.status = 'COMPLETED') /
+                       ((SELECT COUNT(*) FROM class_schedule s WHERE s.class_id = ec.id AND s.status = 'COMPLETED') *
+                        (SELECT COUNT(*) FROM class_student cs WHERE cs.class_id = ec.id AND cs.status = 'ENROLLED')), 2)
+               END AS attendance_rate,
+               CASE
+                   WHEN (SELECT COUNT(*) FROM assignment a WHERE a.class_id = ec.id AND a.status IN ('PUBLISHED', 'CLOSED')) = 0
+                     OR (SELECT COUNT(*) FROM class_student cs WHERE cs.class_id = ec.id AND cs.status = 'ENROLLED') = 0
+                   THEN 0
+                   ELSE ROUND(100.0 *
+                       (SELECT COUNT(*)
+                          FROM assignment a
+                          JOIN class_student cs ON cs.class_id = a.class_id AND cs.status = 'ENROLLED'
+                          JOIN assignment_submission sub ON sub.assignment_id = a.id AND sub.student_id = cs.student_id
+                         WHERE a.class_id = ec.id AND a.status IN ('PUBLISHED', 'CLOSED')) /
+                       ((SELECT COUNT(*) FROM assignment a WHERE a.class_id = ec.id AND a.status IN ('PUBLISHED', 'CLOSED')) *
+                        (SELECT COUNT(*) FROM class_student cs WHERE cs.class_id = ec.id AND cs.status = 'ENROLLED')), 2)
+               END AS assignment_completion_rate,
+               (SELECT ROUND(AVG(at.score), 2) FROM exam_attempt at JOIN exam e ON e.id = at.exam_id WHERE e.class_id = ec.id AND at.status = 'GRADED') AS average_score,
+               (SELECT MAX(at.score) FROM exam_attempt at JOIN exam e ON e.id = at.exam_id WHERE e.class_id = ec.id AND at.status = 'GRADED') AS highest_score,
+               (SELECT MIN(at.score) FROM exam_attempt at JOIN exam e ON e.id = at.exam_id WHERE e.class_id = ec.id AND at.status = 'GRADED') AS lowest_score,
+               CASE
+                   WHEN (SELECT COUNT(*) FROM exam_attempt at JOIN exam e ON e.id = at.exam_id WHERE e.class_id = ec.id AND at.status = 'GRADED') = 0
+                   THEN 0
+                   ELSE ROUND(100.0 *
+                       (SELECT COUNT(*)
+                          FROM exam_attempt at
+                          JOIN exam e ON e.id = at.exam_id
+                         WHERE e.class_id = ec.id
+                           AND at.status = 'GRADED'
+                           AND at.score &gt;= 0.6 * (SELECT SUM(eq.score) FROM exam_question eq WHERE eq.exam_id = e.id)) /
+                       (SELECT COUNT(*) FROM exam_attempt at JOIN exam e ON e.id = at.exam_id WHERE e.class_id = ec.id AND at.status = 'GRADED'), 2)
+               END AS exam_pass_rate
+          FROM edu_class ec
+         WHERE ec.id = #{classId}
+    </select>
+
+    <select id="exams" resultMap="examAnalyticsMap">
+        SELECT e.id AS exam_id,
+               e.title,
+               COUNT(a.id) AS graded_attempt_count,
+               ROUND(AVG(a.score), 2) AS average_score,
+               MAX(a.score) AS highest_score,
+               MIN(a.score) AS lowest_score,
+               CASE
+                   WHEN COUNT(a.id) = 0 THEN 0
+                   ELSE ROUND(100.0 * SUM(CASE
+                       WHEN a.score &gt;= 0.6 * (SELECT SUM(eq.score) FROM exam_question eq WHERE eq.exam_id = e.id) THEN 1
+                       ELSE 0
+                   END) / COUNT(a.id), 2)
+               END AS pass_rate
+          FROM exam e
+          LEFT JOIN exam_attempt a ON a.exam_id = e.id AND a.status = 'GRADED'
+         WHERE e.class_id = #{classId}
+         GROUP BY e.id, e.title
+         ORDER BY e.start_time DESC, e.id DESC
+    </select>
+
+    <select id="recentStudentResults" resultMap="studentExamHistoryMap">
+        SELECT u.id AS student_id,
+               u.real_name AS student_name,
+               e.id AS exam_id,
+               e.title AS exam_title,
+               a.score,
+               a.submitted_at
+          FROM exam_attempt a
+          JOIN exam e ON e.id = a.exam_id
+          JOIN sys_user u ON u.id = a.student_id
+         WHERE e.class_id = #{classId}
+           AND a.status = 'GRADED'
+         ORDER BY a.submitted_at DESC, a.id DESC
+         LIMIT 20
+    </select>
+</mapper>

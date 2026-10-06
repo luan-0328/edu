@@ -1,0 +1,14 @@
+{
+  "courseId": 16,
+  "courseName": "Redis 与消息队列入门",
+  "classId": 19,
+  "className": "Redis 与消息队列体验班",
+  "teacherName": "林老师",
+  "classStatus": "ENROLLING",
+  "examId": 15,
+  "examTitle": "Java 基础测验 · 自主体验",
+  "examStatus": "PUBLISHED",
+  "questions": 5,
+  "studentAttemptStatus": null,
+  "createdAtUtc": "2026-10-06T07:45:31.0477662Z"
+}

@@ -1,7 +1,7 @@
 package com.educore.assignment.entity;
 
 import com.baomidou.mybatisplus.annotation.*;
-import com.educore.assignment.enums.SubmissionStatus;
+import com.educore.assignment.entity.enums.SubmissionStatus;
 import lombok.Data;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;

@@ -2,7 +2,7 @@ package com.educore.security;
 
 import com.educore.config.JwtProperties;
 import com.educore.user.entity.UserEntity;
-import com.educore.user.enums.UserRole;
+import com.educore.user.entity.enums.UserRole;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 

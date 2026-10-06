@@ -1,6 +1,6 @@
 package com.educore.examination.entity;
 import com.baomidou.mybatisplus.annotation.*;
-import com.educore.examination.enums.*;
+import com.educore.examination.entity.enums.*;
 import lombok.Data;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;

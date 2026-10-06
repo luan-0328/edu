@@ -20,27 +20,41 @@ Vue 3 SPA ──HTTP/JWT──> Spring Boot REST
 - `enrollment`：订单、名额、模拟支付、outbox 与消息消费。
 - `attendance/assignment/notification`：考勤、作业、批改和站内通知。
 - `examination`：题库、试卷、考试尝试、答题、自动/人工阅卷与超时收卷。
+- `dashboard`：管理员、教师和学生工作台及 MySQL 教学分析。
+- `audit/course-cache`：业务操作审计和 Redis 课程缓存失效补偿。
 
-Controller、Service、Mapper 统一按技术层归档，同时各层以业务域子包隔离：
+Controller、Service、Mapper 按业务模块归档。模块模型统一放在 `entity` 包下，持久化实体直接位于该包，DTO、VO 和枚举分别位于其子包：
 
 ```text
 com.educore
-├── controller/{user,course,teachingclass,enrollment,...}
-│   └── advice              # REST 全局异常处理
-├── service/{user,course,teachingclass,enrollment,...}
-├── mapper/{user,course,teachingclass,enrollment,...}
-├── config                  # Spring、MyBatis、缓存和 RabbitMQ 配置
-├── common                  # 响应、错误、分页和 requestId
+├── user/{controller,service,mapper}
+│   └── entity/{dto,vo,enums}
+├── course/{controller,service,mapper}
+│   └── entity/{dto,vo,enums}
+├── enrollment/{controller,service,mapper,messaging}
+│   └── entity/{dto,vo,enums}
+├── assignment/{controller,service,mapper}
+│   └── entity/{dto,vo,enums}
+├── examination/{controller,service,mapper,messaging}
+│   └── entity/{dto,vo,enums}
+├── dashboard/{controller,service,mapper}
+│   └── entity/vo
+├── audit/{controller,service,mapper}
+│   └── entity
+├── common/web              # REST 全局异常处理及通用类型
 ├── security                # JWT 身份认证组件
-└── {user,course,enrollment,...}/{dto,entity,enums,vo,messaging}
+├── config                  # Spring、MyBatis、缓存和 RabbitMQ 配置
+└── {attendance,classroom,schedule,teachingclass,notification}/...
 ```
 
-DTO、Entity、枚举、VO 和领域消息仍归属各业务域；这样入口、业务逻辑和数据访问能按层快速定位，同时避免同名类跨模块混淆。
+例如 `com.educore.user.entity.UserEntity`、`com.educore.user.entity.dto.RegisterRequest` 和 `com.educore.user.entity.vo.UserView` 都属于用户模块模型。MyBatis-Plus `BaseMapper`、条件构造器和分页用于常规 CRUD；多表聚合、行锁、条件原子更新、Outbox 租约及幂等插入保留明确的定制 SQL，以维持业务事务语义。
 
 模块间以服务和领域 DTO 交互。学生归属从认证主体取得，教师管理教学数据前执行班级/课次归属校验。
 
 ## 数据与异步任务
 
-MySQL 是订单、报名、排课、作业和考试的事实来源。业务通知/订单到期消息先写入事务 outbox，再由后台发布器发送 RabbitMQ；消费者依靠消费日志及业务唯一键幂等。Redis 仅用于课程详情缓存，不决定用户权限、订单状态或名额。订单和考试的过期处理均有数据库定时补偿路径。
+MySQL 是订单、报名、排课、作业和考试的事实来源。业务通知/订单到期消息先写入事务 outbox，再由后台发布器发送 RabbitMQ；消费者依靠消费日志及业务唯一键幂等。Redis 仅用于课程详情缓存，不决定用户权限、订单状态或名额；课程更新事务同步写缓存失效记录，失效异常由数据库任务重试。订单和考试的过期处理均有数据库定时补偿路径。已认证的 API 写操作写入精简审计表，不持久化请求体或敏感凭据。
 
-当前没有 Docker 编排，应用通过环境变量连接本机或独立部署的 MySQL、Redis、RabbitMQ。
+前端可通过 `compose.yaml` 和 Nginx 容器提供静态资源并反向代理 `/api`；Compose 同时定义 MySQL、Redis、RabbitMQ 和 Spring Boot 容器。云端已使用 Docker Compose 5.6.0 构建运行镜像并完成五个容器的启动和 API 验证，详见 [测试报告](test-report.md)。
+
+管理员、教师和学生看板及班级分析均在 Spring 服务内聚合 Mapper 的 MySQL 查询，不引入额外分析系统。考试草稿复用 V5 `exam_answer` 唯一键。V6 增加课次 `COMPLETED` 状态，V7 增加操作审计及课程缓存失效补偿表。

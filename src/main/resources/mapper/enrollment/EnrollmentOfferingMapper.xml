@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.educore.enrollment.mapper.EnrollmentOfferingMapper">
+    <resultMap id="enrollmentOfferingMap" type="com.educore.enrollment.entity.vo.EnrollmentOffering">
+        <id column="class_id" property="classId" javaType="java.lang.Long"/>
+        <result column="course_id" property="courseId" javaType="java.lang.Long"/>
+        <result column="price" property="price" javaType="java.math.BigDecimal"/>
+        <result column="course_status" property="courseStatus" javaType="com.educore.course.entity.enums.CourseStatus"/>
+        <result column="class_status" property="classStatus" javaType="com.educore.teachingclass.entity.enums.ClassStatus"/>
+        <result column="start_date" property="startDate" javaType="java.time.LocalDate"/>
+        <result column="end_date" property="endDate" javaType="java.time.LocalDate"/>
+    </resultMap>
+    <select id="find" resultMap="enrollmentOfferingMap">
+        SELECT ec.id AS class_id, ec.course_id, c.price,
+               c.status AS course_status, ec.status AS class_status,
+               ec.start_date, ec.end_date
+          FROM edu_class ec
+          JOIN course c ON c.id = ec.course_id
+         WHERE ec.id = #{classId}
+    </select>
+</mapper>

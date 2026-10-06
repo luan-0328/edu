@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.educore.teachingclass.mapper.TeachingClassMapper">
+    <select id="countTeachingContent" resultType="long">
+        SELECT (SELECT COUNT(*) FROM assignment WHERE class_id = #{classId})
+             + (SELECT COUNT(*) FROM exam WHERE class_id = #{classId})
+    </select>
+    <select id="countMissingAttendance" resultType="long">
+        SELECT COUNT(*)
+          FROM class_schedule s
+          JOIN class_student cs ON cs.class_id = s.class_id AND cs.status = 'ENROLLED'
+          LEFT JOIN attendance a ON a.schedule_id = s.id AND a.student_id = cs.student_id
+         WHERE s.class_id = #{classId} AND s.status = 'COMPLETED' AND a.id IS NULL
+    </select>
+</mapper>

@@ -1,0 +1,346 @@
+[
+  {
+    "role": "admin",
+    "path": "/api/auth/login",
+    "status": 200,
+    "expected": 200,
+    "code": "SUCCESS",
+    "pass": true
+  },
+  {
+    "role": "admin",
+    "path": "/api/users/me",
+    "status": 200,
+    "expected": 200,
+    "code": "SUCCESS",
+    "pass": true
+  },
+  {
+    "role": "teacher",
+    "path": "/api/auth/login",
+    "status": 200,
+    "expected": 200,
+    "code": "SUCCESS",
+    "pass": true
+  },
+  {
+    "role": "teacher",
+    "path": "/api/users/me",
+    "status": 200,
+    "expected": 200,
+    "code": "SUCCESS",
+    "pass": true
+  },
+  {
+    "role": "student",
+    "path": "/api/auth/login",
+    "status": 200,
+    "expected": 200,
+    "code": "SUCCESS",
+    "pass": true
+  },
+  {
+    "role": "student",
+    "path": "/api/users/me",
+    "status": 200,
+    "expected": 200,
+    "code": "SUCCESS",
+    "pass": true
+  },
+  {
+    "role": "admin",
+    "path": "/api/admin/dashboard",
+    "status": 200,
+    "expected": 200,
+    "code": "SUCCESS",
+    "pass": true
+  },
+  {
+    "role": "admin",
+    "path": "/api/admin/users",
+    "status": 200,
+    "expected": 200,
+    "code": "SUCCESS",
+    "pass": true
+  },
+  {
+    "role": "admin",
+    "path": "/api/admin/courses",
+    "status": 200,
+    "expected": 200,
+    "code": "SUCCESS",
+    "pass": true
+  },
+  {
+    "role": "admin",
+    "path": "/api/admin/classes",
+    "status": 200,
+    "expected": 200,
+    "code": "SUCCESS",
+    "pass": true
+  },
+  {
+    "role": "admin",
+    "path": "/api/admin/classrooms",
+    "status": 200,
+    "expected": 200,
+    "code": "SUCCESS",
+    "pass": true
+  },
+  {
+    "role": "admin",
+    "path": "/api/admin/orders",
+    "status": 200,
+    "expected": 200,
+    "code": "SUCCESS",
+    "pass": true
+  },
+  {
+    "role": "admin",
+    "path": "/api/admin/audit-logs",
+    "status": 200,
+    "expected": 200,
+    "code": "SUCCESS",
+    "pass": true
+  },
+  {
+    "role": "admin",
+    "path": "/api/admin/classes/14/analytics",
+    "status": 200,
+    "expected": 200,
+    "code": "SUCCESS",
+    "pass": true
+  },
+  {
+    "role": "teacher",
+    "path": "/api/teacher/dashboard",
+    "status": 200,
+    "expected": 200,
+    "code": "SUCCESS",
+    "pass": true
+  },
+  {
+    "role": "teacher",
+    "path": "/api/teacher/classes",
+    "status": 200,
+    "expected": 200,
+    "code": "SUCCESS",
+    "pass": true
+  },
+  {
+    "role": "teacher",
+    "path": "/api/teacher/classes/14/students",
+    "status": 200,
+    "expected": 200,
+    "code": "SUCCESS",
+    "pass": true
+  },
+  {
+    "role": "teacher",
+    "path": "/api/teacher/schedules",
+    "status": 200,
+    "expected": 200,
+    "code": "SUCCESS",
+    "pass": true
+  },
+  {
+    "role": "teacher",
+    "path": "/api/teacher/classes/14/assignments",
+    "status": 200,
+    "expected": 200,
+    "code": "SUCCESS",
+    "pass": true
+  },
+  {
+    "role": "teacher",
+    "path": "/api/teacher/questions",
+    "status": 200,
+    "expected": 200,
+    "code": "SUCCESS",
+    "pass": true
+  },
+  {
+    "role": "teacher",
+    "path": "/api/teacher/exams",
+    "status": 200,
+    "expected": 200,
+    "code": "SUCCESS",
+    "pass": true
+  },
+  {
+    "role": "teacher",
+    "path": "/api/teacher/exams/8/results",
+    "status": 200,
+    "expected": 200,
+    "code": "SUCCESS",
+    "pass": true
+  },
+  {
+    "role": "teacher",
+    "path": "/api/teacher/exams/9/answers",
+    "status": 200,
+    "expected": 200,
+    "code": "SUCCESS",
+    "pass": true
+  },
+  {
+    "role": "teacher",
+    "path": "/api/teacher/classes/14/analytics",
+    "status": 200,
+    "expected": 200,
+    "code": "SUCCESS",
+    "pass": true
+  },
+  {
+    "role": "student",
+    "path": "/api/students/me/dashboard",
+    "status": 200,
+    "expected": 200,
+    "code": "SUCCESS",
+    "pass": true
+  },
+  {
+    "role": "student",
+    "path": "/api/courses",
+    "status": 200,
+    "expected": 200,
+    "code": "SUCCESS",
+    "pass": true
+  },
+  {
+    "role": "student",
+    "path": "/api/courses/12",
+    "status": 200,
+    "expected": 200,
+    "code": "SUCCESS",
+    "pass": true
+  },
+  {
+    "role": "student",
+    "path": "/api/classes?courseId=12",
+    "status": 200,
+    "expected": 200,
+    "code": "SUCCESS",
+    "pass": true
+  },
+  {
+    "role": "student",
+    "path": "/api/students/me/classes",
+    "status": 200,
+    "expected": 200,
+    "code": "SUCCESS",
+    "pass": true
+  },
+  {
+    "role": "student",
+    "path": "/api/students/me/course-enrollments",
+    "status": 200,
+    "expected": 200,
+    "code": "SUCCESS",
+    "pass": true
+  },
+  {
+    "role": "student",
+    "path": "/api/orders",
+    "status": 200,
+    "expected": 200,
+    "code": "SUCCESS",
+    "pass": true
+  },
+  {
+    "role": "student",
+    "path": "/api/classes/14/schedules",
+    "status": 200,
+    "expected": 200,
+    "code": "SUCCESS",
+    "pass": true
+  },
+  {
+    "role": "student",
+    "path": "/api/students/me/attendance",
+    "status": 200,
+    "expected": 200,
+    "code": "SUCCESS",
+    "pass": true
+  },
+  {
+    "role": "student",
+    "path": "/api/students/me/assignments",
+    "status": 200,
+    "expected": 200,
+    "code": "SUCCESS",
+    "pass": true
+  },
+  {
+    "role": "student",
+    "path": "/api/students/me/exams",
+    "status": 200,
+    "expected": 200,
+    "code": "SUCCESS",
+    "pass": true
+  },
+  {
+    "role": "student",
+    "path": "/api/notifications",
+    "status": 200,
+    "expected": 200,
+    "code": "SUCCESS",
+    "pass": true
+  },
+  {
+    "role": "student",
+    "path": "/api/notifications/unread-count",
+    "status": 200,
+    "expected": 200,
+    "code": "SUCCESS",
+    "pass": true
+  },
+  {
+    "role": "student",
+    "path": "/api/exams/8/result",
+    "status": 200,
+    "expected": 200,
+    "code": "SUCCESS",
+    "pass": true
+  },
+  {
+    "role": "student",
+    "path": "/api/exams/10/result",
+    "status": 200,
+    "expected": 200,
+    "code": "SUCCESS",
+    "pass": true
+  },
+  {
+    "role": "student",
+    "path": "/api/admin/users",
+    "status": 403,
+    "expected": 403,
+    "code": "FORBIDDEN",
+    "pass": true
+  },
+  {
+    "role": "teacher",
+    "path": "/api/admin/courses",
+    "status": 403,
+    "expected": 403,
+    "code": "FORBIDDEN",
+    "pass": true
+  },
+  {
+    "role": "admin",
+    "path": "/api/teacher/questions",
+    "status": 403,
+    "expected": 403,
+    "code": "FORBIDDEN",
+    "pass": true
+  },
+  {
+    "role": "none",
+    "path": "/api/courses",
+    "status": 401,
+    "expected": 401,
+    "code": "UNAUTHENTICATED",
+    "pass": true
+  }
+]

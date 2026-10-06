@@ -3,7 +3,7 @@ package com.educore.enrollment.entity;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import com.educore.enrollment.enums.OrderStatus;
+import com.educore.enrollment.entity.enums.OrderStatus;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.math.BigDecimal;

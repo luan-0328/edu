@@ -2,6 +2,12 @@ target/
 .idea/
 *.iml
 .env
+.env.*
+!.env.example
 *.log
+*.jtl
+/performance/users.csv
+/performance/results/
+/performance/report/
 /web/node_modules/
 /web/dist/

@@ -3,8 +3,8 @@ spring:
     name: educore
   datasource:
     url: ${DB_URL:jdbc:mysql://localhost:3306/educore?useUnicode=true&characterEncoding=utf8&serverTimezone=UTC}
-    username: ${DB_USERNAME:educore}
-    password: ${DB_PASSWORD:}
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:1234}
     hikari:
       connection-init-sql: SET time_zone = '+00:00'
   flyway:
@@ -64,6 +64,9 @@ educore:
   exam:
     expiration-enabled: ${EXAM_EXPIRATION_ENABLED:true}
     expiration-scan-ms: ${EXAM_EXPIRATION_SCAN_MS:60000}
+logging:
+  pattern:
+    level: "%5p [requestId=%X{requestId:-none}]"
 springdoc:
   swagger-ui:
     path: /swagger-ui.html

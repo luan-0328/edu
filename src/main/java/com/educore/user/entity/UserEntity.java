@@ -1,8 +1,8 @@
 package com.educore.user.entity;
 
 import com.baomidou.mybatisplus.annotation.*;
-import com.educore.user.enums.UserRole;
-import com.educore.user.enums.UserStatus;
+import com.educore.user.entity.enums.UserRole;
+import com.educore.user.entity.enums.UserStatus;
 import java.time.LocalDateTime;
 
 @TableName("sys_user")

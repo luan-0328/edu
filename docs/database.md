@@ -42,6 +42,41 @@
 
 索引支持班级考试列表、教师题库筛选、学生尝试、待批答案与成绩查询。题库答案不会通过学生考试 API 返回；试卷快照使考试发布后不受题库修改影响。
 
+## V6：课次完成状态
+
+`V6__lesson_completion.sql` 扩展 `class_schedule.status` 约束，新增 `COMPLETED`。完成状态由教师完成考勤并确认课次后写入；已完成课次不再允许修改考勤。班级结课校验和教学进度看板据此统计计划及已完成课次。
+
+## V7：操作审计与课程缓存失效补偿
+
+- `operation_audit_log`：记录已认证用户的 API 写操作元数据（操作者、角色、方法、路径、HTTP 结果、requestId 和时间）；不保存密码、JWT、请求体或作答内容。
+- `course_cache_invalidation`：与课程事务一起写入，Redis 暂时不可用时按退避间隔重试失效；正常路径仍在事务提交后立即清除缓存。Redis 仍不是课程事实源。
+- 考试草稿复用 V5 的 `exam_answer` 和 `(attempt_id, exam_question_id)` 唯一键，不增加冗余答题表；提交或超时收卷时按草稿中的客观题答案评分。
+
+## 核心关系图
+
+```mermaid
+erDiagram
+    SYS_USER ||--o{ EDU_CLASS : teaches
+    COURSE ||--o{ EDU_CLASS : offers
+    EDU_CLASS ||--o{ CLASS_STUDENT : enrolls
+    SYS_USER ||--o{ CLASS_STUDENT : attends
+    EDU_CLASS ||--o{ CLASS_SCHEDULE : schedules
+    CLASSROOM ||--o{ CLASS_SCHEDULE : hosts
+    CLASS_SCHEDULE ||--o{ ATTENDANCE : records
+    EDU_CLASS ||--o{ ENROLLMENT_ORDER : sells
+    SYS_USER ||--o{ ENROLLMENT_ORDER : places
+    ENROLLMENT_ORDER ||--o| PAYMENT_RECORD : pays
+    EDU_CLASS ||--o{ ASSIGNMENT : assigns
+    ASSIGNMENT ||--o{ ASSIGNMENT_SUBMISSION : receives
+    EDU_CLASS ||--o{ EXAM : examines
+    EXAM ||--o{ EXAM_QUESTION : snapshots
+    EXAM ||--o{ EXAM_ATTEMPT : attempts
+    EXAM_ATTEMPT ||--o{ EXAM_ANSWER : answers
+    SYS_USER ||--o{ NOTIFICATION : receives
+    SYS_USER ||--o{ OPERATION_AUDIT_LOG : acts
+    COURSE ||--o| COURSE_CACHE_INVALIDATION : invalidates
+```
+
 ## 索引与一致性要点
 
 - `course(status, created_at, id)`、`edu_class(course_id, status)`、`edu_class(teacher_id, status)`：课程列表及教学班查询。

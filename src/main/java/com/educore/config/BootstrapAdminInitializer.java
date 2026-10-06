@@ -1,9 +1,9 @@
 package com.educore.config;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.educore.user.entity.UserEntity;
-import com.educore.user.enums.UserRole;
-import com.educore.user.enums.UserStatus;
-import com.educore.mapper.user.UserMapper;
+import com.educore.user.entity.enums.UserRole;
+import com.educore.user.entity.enums.UserStatus;
+import com.educore.user.mapper.UserMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.ApplicationArguments;

@@ -3,7 +3,7 @@ package com.educore.attendance.entity;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import com.educore.attendance.enums.AttendanceStatus;
+import com.educore.attendance.entity.enums.AttendanceStatus;
 import lombok.Data;
 import java.time.LocalDateTime;
 

@@ -1,7 +1,7 @@
 package com.educore.assignment.entity;
 
 import com.baomidou.mybatisplus.annotation.*;
-import com.educore.assignment.enums.AssignmentStatus;
+import com.educore.assignment.entity.enums.AssignmentStatus;
 import lombok.Data;
 import java.time.LocalDateTime;
 @Data @TableName("assignment")

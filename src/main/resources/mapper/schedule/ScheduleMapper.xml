@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.educore.schedule.mapper.ScheduleMapper">
+    <sql id="overlappingSchedules">
+        status IN ('SCHEDULED', 'COMPLETED')
+        AND start_time &lt; #{endTime} AND end_time &gt; #{startTime}
+        AND id &lt;&gt; #{excludeId}
+    </sql>
+    <select id="findTeacherConflicts" resultType="long">
+        SELECT id FROM class_schedule
+        WHERE teacher_id = #{resourceId} AND <include refid="overlappingSchedules"/>
+        ORDER BY id FOR UPDATE
+    </select>
+    <select id="findClassroomConflicts" resultType="long">
+        SELECT id FROM class_schedule
+        WHERE classroom_id = #{resourceId} AND <include refid="overlappingSchedules"/>
+        ORDER BY id FOR UPDATE
+    </select>
+    <select id="findClassConflicts" resultType="long">
+        SELECT id FROM class_schedule
+        WHERE class_id = #{resourceId} AND <include refid="overlappingSchedules"/>
+        ORDER BY id FOR UPDATE
+    </select>
+    <resultMap id="scheduleViewMap" type="com.educore.schedule.entity.vo.ScheduleView">
+        <constructor>
+            <idArg column="id" javaType="java.lang.Long"/>
+            <arg column="class_id" javaType="java.lang.Long"/>
+            <arg column="teacher_id" javaType="java.lang.Long"/>
+            <arg column="classroom_id" javaType="java.lang.Long"/>
+            <arg column="start_time" javaType="java.time.LocalDateTime"/>
+            <arg column="end_time" javaType="java.time.LocalDateTime"/>
+            <arg column="status" javaType="com.educore.schedule.entity.enums.ScheduleStatus"/>
+            <arg column="teacher_name" javaType="java.lang.String"/>
+        </constructor>
+    </resultMap>
+    <select id="selectClassScheduleViews" resultMap="scheduleViewMap">
+        SELECT s.id, s.class_id, s.teacher_id, s.classroom_id, s.start_time, s.end_time,
+               s.status, u.real_name AS teacher_name
+          FROM class_schedule s
+          JOIN sys_user u ON u.id = s.teacher_id
+         WHERE s.class_id = #{classId} AND s.status IN ('SCHEDULED', 'COMPLETED')
+         ORDER BY s.start_time
+    </select>
+    <select id="selectTeacherScheduleViews" resultMap="scheduleViewMap">
+        SELECT s.id, s.class_id, s.teacher_id, s.classroom_id, s.start_time, s.end_time,
+               s.status, u.real_name AS teacher_name
+          FROM class_schedule s
+          JOIN sys_user u ON u.id = s.teacher_id
+         WHERE s.teacher_id = #{teacherId} AND s.status IN ('SCHEDULED', 'COMPLETED')
+         ORDER BY s.start_time
+    </select>
+    <select id="countMissingAttendanceForClass" resultType="long">
+        SELECT COUNT(*)
+          FROM class_schedule s
+          JOIN class_student cs ON cs.class_id = s.class_id AND cs.status = 'ENROLLED'
+          LEFT JOIN attendance a ON a.schedule_id = s.id AND a.student_id = cs.student_id
+         WHERE s.class_id = #{classId} AND s.status = 'COMPLETED' AND a.id IS NULL
+    </select>
+</mapper>

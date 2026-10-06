@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.educore.examination.mapper.ExamMapper">
+    <resultMap id="examSummaryMap" type="com.educore.examination.entity.vo.ExamSummaryView">
+        <constructor>
+            <idArg column="id" javaType="java.lang.Long"/>
+            <arg column="class_id" javaType="java.lang.Long"/>
+            <arg column="class_name" javaType="java.lang.String"/>
+            <arg column="title" javaType="java.lang.String"/>
+            <arg column="start_time" javaType="java.time.LocalDateTime"/>
+            <arg column="end_time" javaType="java.time.LocalDateTime"/>
+            <arg column="duration_minutes" javaType="java.lang.Integer"/>
+            <arg column="status" javaType="com.educore.examination.entity.enums.ExamStatus"/>
+            <arg column="attempt_status" javaType="com.educore.examination.entity.enums.AttemptStatus"/>
+        </constructor>
+    </resultMap>
+    <resultMap id="studentExamResultMap" type="com.educore.dashboard.entity.vo.StudentExamResultView">
+        <constructor>
+            <idArg column="exam_id" javaType="java.lang.Long"/>
+            <arg column="exam_title" javaType="java.lang.String"/>
+            <arg column="class_id" javaType="java.lang.Long"/>
+            <arg column="class_name" javaType="java.lang.String"/>
+            <arg column="score" javaType="java.math.BigDecimal"/>
+            <arg column="submitted_at" javaType="java.time.LocalDateTime"/>
+        </constructor>
+    </resultMap>
+
+    <select id="listStudentExams" resultMap="examSummaryMap">
+        SELECT e.id, e.class_id, c.name AS class_name, e.title, e.start_time, e.end_time,
+               e.duration_minutes, e.status, a.status AS attempt_status
+          FROM exam e
+          JOIN edu_class c ON c.id = e.class_id
+          JOIN class_student cs ON cs.class_id = e.class_id AND cs.student_id = #{studentId} AND cs.status = 'ENROLLED'
+          LEFT JOIN exam_attempt a ON a.exam_id = e.id AND a.student_id = #{studentId}
+         WHERE e.status IN ('PUBLISHED', 'CLOSED')
+         ORDER BY e.start_time, e.id
+    </select>
+    <select id="recentStudentResults" resultMap="studentExamResultMap">
+        SELECT e.id AS exam_id, e.title AS exam_title, e.class_id, c.name AS class_name,
+               a.score, a.submitted_at
+          FROM exam_attempt a
+          JOIN exam e ON e.id = a.exam_id
+          JOIN edu_class c ON c.id = e.class_id
+         WHERE a.student_id = #{studentId} AND a.status = 'GRADED'
+         ORDER BY a.submitted_at DESC, a.id DESC
+         LIMIT 5
+    </select>
+</mapper>

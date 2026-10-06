@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.educore.enrollment.mapper.ClassStudentMapper">
+    <select id="countActiveCourseEnrollment" resultType="long">
+        SELECT COUNT(*)
+          FROM class_student cs
+          JOIN edu_class ec ON ec.id = cs.class_id
+         WHERE cs.student_id = #{studentId} AND cs.status = 'ENROLLED'
+           AND ec.course_id = #{courseId} AND ec.status IN ('ENROLLING', 'IN_PROGRESS')
+    </select>
+    <resultMap id="studentClassMap" type="com.educore.enrollment.entity.vo.StudentClassView">
+        <constructor>
+            <idArg column="class_id" javaType="java.lang.Long"/>
+            <arg column="course_id" javaType="java.lang.Long"/>
+            <arg column="course_name" javaType="java.lang.String"/>
+            <arg column="class_name" javaType="java.lang.String"/>
+            <arg column="teacher_id" javaType="java.lang.Long"/>
+            <arg column="teacher_name" javaType="java.lang.String"/>
+            <arg column="start_date" javaType="java.time.LocalDate"/>
+            <arg column="end_date" javaType="java.time.LocalDate"/>
+            <arg column="enrolled_at" javaType="java.time.LocalDateTime"/>
+        </constructor>
+    </resultMap>
+    <select id="selectStudentClasses" resultMap="studentClassMap">
+        SELECT cs.class_id, c.id AS course_id, c.name AS course_name,
+               ec.name AS class_name, ec.teacher_id, u.real_name AS teacher_name,
+               ec.start_date, ec.end_date, cs.enrolled_at
+          FROM class_student cs
+          JOIN edu_class ec ON ec.id = cs.class_id
+          JOIN course c ON c.id = ec.course_id
+          JOIN sys_user u ON u.id = ec.teacher_id
+         WHERE cs.student_id = #{studentId} AND cs.status = 'ENROLLED'
+         ORDER BY cs.enrolled_at DESC, cs.id DESC
+    </select>
+</mapper>

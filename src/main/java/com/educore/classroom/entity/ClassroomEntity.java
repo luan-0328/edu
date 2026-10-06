@@ -1,6 +1,6 @@
 package com.educore.classroom.entity;
 import com.baomidou.mybatisplus.annotation.*;
-import com.educore.classroom.enums.ClassroomStatus;
+import com.educore.classroom.entity.enums.ClassroomStatus;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;

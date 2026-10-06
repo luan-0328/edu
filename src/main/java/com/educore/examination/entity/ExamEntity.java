@@ -1,6 +1,6 @@
 package com.educore.examination.entity;
 import com.baomidou.mybatisplus.annotation.*;
-import com.educore.examination.enums.ExamStatus;
+import com.educore.examination.entity.enums.ExamStatus;
 import lombok.Data;
 import java.time.LocalDateTime;
 @Data @TableName("exam")

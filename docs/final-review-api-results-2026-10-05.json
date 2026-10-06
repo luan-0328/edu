@@ -1,0 +1,524 @@
+[
+  {
+    "role": "admin",
+    "method": "POST",
+    "path": "/api/auth/login",
+    "expected": 200,
+    "actual": 200,
+    "code": "SUCCESS",
+    "pass": true
+  },
+  {
+    "role": "admin",
+    "method": "GET",
+    "path": "/api/users/me",
+    "expected": 200,
+    "actual": 200,
+    "code": "SUCCESS",
+    "pass": true
+  },
+  {
+    "role": "teacher",
+    "method": "POST",
+    "path": "/api/auth/login",
+    "expected": 200,
+    "actual": 200,
+    "code": "SUCCESS",
+    "pass": true
+  },
+  {
+    "role": "teacher",
+    "method": "GET",
+    "path": "/api/users/me",
+    "expected": 200,
+    "actual": 200,
+    "code": "SUCCESS",
+    "pass": true
+  },
+  {
+    "role": "student",
+    "method": "POST",
+    "path": "/api/auth/login",
+    "expected": 200,
+    "actual": 200,
+    "code": "SUCCESS",
+    "pass": true
+  },
+  {
+    "role": "student",
+    "method": "GET",
+    "path": "/api/users/me",
+    "expected": 200,
+    "actual": 200,
+    "code": "SUCCESS",
+    "pass": true
+  },
+  {
+    "role": "admin",
+    "method": "GET",
+    "path": "/api/admin/dashboard",
+    "expected": 200,
+    "actual": 200,
+    "code": "SUCCESS",
+    "pass": true
+  },
+  {
+    "role": "admin",
+    "method": "GET",
+    "path": "/api/admin/users",
+    "expected": 200,
+    "actual": 200,
+    "code": "SUCCESS",
+    "pass": true
+  },
+  {
+    "role": "admin",
+    "method": "GET",
+    "path": "/api/admin/courses",
+    "expected": 200,
+    "actual": 200,
+    "code": "SUCCESS",
+    "pass": true
+  },
+  {
+    "role": "admin",
+    "method": "GET",
+    "path": "/api/admin/classes",
+    "expected": 200,
+    "actual": 200,
+    "code": "SUCCESS",
+    "pass": true
+  },
+  {
+    "role": "admin",
+    "method": "GET",
+    "path": "/api/admin/classrooms",
+    "expected": 200,
+    "actual": 200,
+    "code": "SUCCESS",
+    "pass": true
+  },
+  {
+    "role": "admin",
+    "method": "GET",
+    "path": "/api/admin/orders",
+    "expected": 200,
+    "actual": 200,
+    "code": "SUCCESS",
+    "pass": true
+  },
+  {
+    "role": "admin",
+    "method": "GET",
+    "path": "/api/admin/audit-logs",
+    "expected": 200,
+    "actual": 200,
+    "code": "SUCCESS",
+    "pass": true
+  },
+  {
+    "role": "admin",
+    "method": "GET",
+    "path": "/api/admin/classes/14/analytics",
+    "expected": 200,
+    "actual": 200,
+    "code": "SUCCESS",
+    "pass": true
+  },
+  {
+    "role": "teacher",
+    "method": "GET",
+    "path": "/api/teacher/dashboard",
+    "expected": 200,
+    "actual": 200,
+    "code": "SUCCESS",
+    "pass": true
+  },
+  {
+    "role": "teacher",
+    "method": "GET",
+    "path": "/api/teacher/classes",
+    "expected": 200,
+    "actual": 200,
+    "code": "SUCCESS",
+    "pass": true
+  },
+  {
+    "role": "teacher",
+    "method": "GET",
+    "path": "/api/teacher/classes/14/students",
+    "expected": 200,
+    "actual": 200,
+    "code": "SUCCESS",
+    "pass": true
+  },
+  {
+    "role": "teacher",
+    "method": "GET",
+    "path": "/api/teacher/schedules",
+    "expected": 200,
+    "actual": 200,
+    "code": "SUCCESS",
+    "pass": true
+  },
+  {
+    "role": "teacher",
+    "method": "GET",
+    "path": "/api/teacher/classes/14/assignments",
+    "expected": 200,
+    "actual": 200,
+    "code": "SUCCESS",
+    "pass": true
+  },
+  {
+    "role": "teacher",
+    "method": "GET",
+    "path": "/api/teacher/questions",
+    "expected": 200,
+    "actual": 200,
+    "code": "SUCCESS",
+    "pass": true
+  },
+  {
+    "role": "teacher",
+    "method": "GET",
+    "path": "/api/teacher/exams",
+    "expected": 200,
+    "actual": 200,
+    "code": "SUCCESS",
+    "pass": true
+  },
+  {
+    "role": "teacher",
+    "method": "GET",
+    "path": "/api/teacher/exams/8/results",
+    "expected": 200,
+    "actual": 200,
+    "code": "SUCCESS",
+    "pass": true
+  },
+  {
+    "role": "teacher",
+    "method": "GET",
+    "path": "/api/teacher/exams/9/answers",
+    "expected": 200,
+    "actual": 200,
+    "code": "SUCCESS",
+    "pass": true
+  },
+  {
+    "role": "teacher",
+    "method": "GET",
+    "path": "/api/teacher/classes/14/analytics",
+    "expected": 200,
+    "actual": 200,
+    "code": "SUCCESS",
+    "pass": true
+  },
+  {
+    "role": "student",
+    "method": "GET",
+    "path": "/api/students/me/dashboard",
+    "expected": 200,
+    "actual": 200,
+    "code": "SUCCESS",
+    "pass": true
+  },
+  {
+    "role": "student",
+    "method": "GET",
+    "path": "/api/courses",
+    "expected": 200,
+    "actual": 200,
+    "code": "SUCCESS",
+    "pass": true
+  },
+  {
+    "role": "student",
+    "method": "GET",
+    "path": "/api/courses/12",
+    "expected": 200,
+    "actual": 200,
+    "code": "SUCCESS",
+    "pass": true
+  },
+  {
+    "role": "student",
+    "method": "GET",
+    "path": "/api/classes?courseId=12",
+    "expected": 200,
+    "actual": 200,
+    "code": "SUCCESS",
+    "pass": true
+  },
+  {
+    "role": "student",
+    "method": "GET",
+    "path": "/api/students/me/classes",
+    "expected": 200,
+    "actual": 200,
+    "code": "SUCCESS",
+    "pass": true
+  },
+  {
+    "role": "student",
+    "method": "GET",
+    "path": "/api/students/me/course-enrollments",
+    "expected": 200,
+    "actual": 200,
+    "code": "SUCCESS",
+    "pass": true
+  },
+  {
+    "role": "student",
+    "method": "GET",
+    "path": "/api/orders",
+    "expected": 200,
+    "actual": 200,
+    "code": "SUCCESS",
+    "pass": true
+  },
+  {
+    "role": "student",
+    "method": "GET",
+    "path": "/api/classes/14/schedules",
+    "expected": 200,
+    "actual": 200,
+    "code": "SUCCESS",
+    "pass": true
+  },
+  {
+    "role": "student",
+    "method": "GET",
+    "path": "/api/students/me/attendance",
+    "expected": 200,
+    "actual": 200,
+    "code": "SUCCESS",
+    "pass": true
+  },
+  {
+    "role": "student",
+    "method": "GET",
+    "path": "/api/students/me/assignments",
+    "expected": 200,
+    "actual": 200,
+    "code": "SUCCESS",
+    "pass": true
+  },
+  {
+    "role": "student",
+    "method": "GET",
+    "path": "/api/students/me/exams",
+    "expected": 200,
+    "actual": 200,
+    "code": "SUCCESS",
+    "pass": true
+  },
+  {
+    "role": "student",
+    "method": "GET",
+    "path": "/api/notifications",
+    "expected": 200,
+    "actual": 200,
+    "code": "SUCCESS",
+    "pass": true
+  },
+  {
+    "role": "student",
+    "method": "GET",
+    "path": "/api/notifications/unread-count",
+    "expected": 200,
+    "actual": 200,
+    "code": "SUCCESS",
+    "pass": true
+  },
+  {
+    "role": "student",
+    "method": "GET",
+    "path": "/api/exams/8/result",
+    "expected": 200,
+    "actual": 200,
+    "code": "SUCCESS",
+    "pass": true
+  },
+  {
+    "role": "student",
+    "method": "GET",
+    "path": "/api/exams/10/result",
+    "expected": 200,
+    "actual": 200,
+    "code": "SUCCESS",
+    "pass": true
+  },
+  {
+    "role": "student",
+    "method": "GET",
+    "path": "/api/admin/users",
+    "expected": 403,
+    "actual": 403,
+    "code": "FORBIDDEN",
+    "pass": true
+  },
+  {
+    "role": "teacher",
+    "method": "GET",
+    "path": "/api/admin/courses",
+    "expected": 403,
+    "actual": 403,
+    "code": "FORBIDDEN",
+    "pass": true
+  },
+  {
+    "role": "admin",
+    "method": "GET",
+    "path": "/api/teacher/questions",
+    "expected": 403,
+    "actual": 403,
+    "code": "FORBIDDEN",
+    "pass": true
+  },
+  {
+    "role": "student",
+    "method": "GET",
+    "path": "/api/teacher/exams/8/results",
+    "expected": 403,
+    "actual": 403,
+    "code": "FORBIDDEN",
+    "pass": true
+  },
+  {
+    "role": "teacher",
+    "method": "GET",
+    "path": "/api/students/me/exams",
+    "expected": 403,
+    "actual": 403,
+    "code": "FORBIDDEN",
+    "pass": true
+  },
+  {
+    "role": "none",
+    "method": "GET",
+    "path": "/api/courses",
+    "expected": 401,
+    "actual": 401,
+    "code": "UNAUTHENTICATED",
+    "pass": true
+  },
+  {
+    "role": "student",
+    "method": "POST",
+    "path": "/api/courses/12",
+    "expected": 405,
+    "actual": 405,
+    "code": "VALIDATION_ERROR",
+    "pass": true
+  },
+  {
+    "role": "admin",
+    "method": "GET",
+    "path": "/api/admin/users?size=101",
+    "expected": 400,
+    "actual": 400,
+    "code": "VALIDATION_ERROR",
+    "pass": true
+  },
+  {
+    "role": "student",
+    "method": "POST",
+    "path": "/api/enrollments/orders",
+    "expected": 409,
+    "actual": 409,
+    "code": "ALREADY_ENROLLED",
+    "pass": true
+  },
+  {
+    "role": "student",
+    "method": "GET",
+    "path": "/api/orders/76",
+    "expected": 403,
+    "actual": 403,
+    "code": "ORDER_OWNER_MISMATCH",
+    "pass": true
+  },
+  {
+    "role": "teacher",
+    "method": "GET",
+    "path": "/api/teacher/classes/99999/students",
+    "expected": 403,
+    "actual": 403,
+    "code": "FORBIDDEN",
+    "pass": true
+  },
+  {
+    "role": "teacher",
+    "method": "GET",
+    "path": "/api/teacher/questions",
+    "expected": 200,
+    "actual": 200,
+    "code": "SUCCESS",
+    "pass": true
+  },
+  {
+    "role": "teacher",
+    "method": "POST",
+    "path": "/api/teacher/questions",
+    "expected": 400,
+    "actual": 400,
+    "code": "VALIDATION_ERROR",
+    "pass": true
+  },
+  {
+    "role": "teacher",
+    "method": "POST",
+    "path": "/api/teacher/questions",
+    "expected": 400,
+    "actual": 400,
+    "code": "VALIDATION_ERROR",
+    "pass": true
+  },
+  {
+    "role": "teacher",
+    "method": "POST",
+    "path": "/api/teacher/questions",
+    "expected": 400,
+    "actual": 400,
+    "code": "VALIDATION_ERROR",
+    "pass": true
+  },
+  {
+    "role": "teacher",
+    "method": "POST",
+    "path": "/api/teacher/questions",
+    "expected": 400,
+    "actual": 400,
+    "code": "VALIDATION_ERROR",
+    "pass": true
+  },
+  {
+    "role": "teacher",
+    "method": "GET",
+    "path": "/api/teacher/questions",
+    "expected": 200,
+    "actual": 200,
+    "code": "SUCCESS",
+    "pass": true
+  },
+  {
+    "role": "admin",
+    "method": "GET",
+    "path": "/api/classes/14/schedules",
+    "expected": 200,
+    "actual": 200,
+    "code": "SUCCESS",
+    "pass": true
+  },
+  {
+    "role": "admin",
+    "method": "POST",
+    "path": "/api/admin/schedules",
+    "expected": 409,
+    "actual": 409,
+    "code": "SCHEDULE_CONFLICT",
+    "pass": true
+  }
+]

@@ -1,17 +1,17 @@
 package com.educore.schedule;
 
 import com.educore.common.BusinessException;
-import com.educore.schedule.dto.SaveScheduleRequest;
-import com.educore.service.schedule.ScheduleService;
+import com.educore.schedule.entity.dto.SaveScheduleRequest;
+import com.educore.schedule.service.ScheduleService;
 import com.educore.security.JwtService;
-import com.educore.course.dto.SaveCourseRequest;
-import com.educore.course.enums.CourseStatus;
-import com.educore.service.course.CourseService;
-import com.educore.teachingclass.dto.SaveClassRequest;
-import com.educore.teachingclass.enums.ClassStatus;
-import com.educore.service.teachingclass.TeachingClassService;
+import com.educore.course.entity.dto.SaveCourseRequest;
+import com.educore.course.entity.enums.CourseStatus;
+import com.educore.course.service.CourseService;
+import com.educore.teachingclass.entity.dto.SaveClassRequest;
+import com.educore.teachingclass.entity.enums.ClassStatus;
+import com.educore.teachingclass.service.TeachingClassService;
 import com.educore.user.entity.UserEntity;
-import com.educore.user.enums.UserRole;
+import com.educore.user.entity.enums.UserRole;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

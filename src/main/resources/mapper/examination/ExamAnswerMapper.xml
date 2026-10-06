@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.educore.examination.mapper.ExamAnswerMapper">
+    <resultMap id="gradeAccessMap" type="com.educore.examination.mapper.ExamAnswerMapper$GradeAccess">
+        <constructor>
+            <idArg column="answer_id" javaType="java.lang.Long"/>
+            <arg column="attempt_id" javaType="java.lang.Long"/>
+            <arg column="exam_question_id" javaType="java.lang.Long"/>
+            <arg column="answer_json" javaType="java.lang.String"/>
+            <arg column="correct_answer_json" javaType="java.lang.String"/>
+            <arg column="type" javaType="com.educore.examination.entity.enums.QuestionType"/>
+            <arg column="max_score" javaType="java.math.BigDecimal"/>
+            <arg column="teacher_id" javaType="java.lang.Long"/>
+            <arg column="attempt_status" javaType="com.educore.examination.entity.enums.AttemptStatus"/>
+        </constructor>
+    </resultMap>
+    <resultMap id="pendingExamAnswerMap" type="com.educore.examination.entity.vo.PendingExamAnswerView">
+        <constructor>
+            <idArg column="answer_id" javaType="java.lang.Long"/>
+            <arg column="attempt_id" javaType="java.lang.Long"/>
+            <arg column="student_id" javaType="java.lang.Long"/>
+            <arg column="student_name" javaType="java.lang.String"/>
+            <arg column="exam_question_id" javaType="java.lang.Long"/>
+            <arg column="type" javaType="com.educore.examination.entity.enums.QuestionType"/>
+            <arg column="content" javaType="java.lang.String"/>
+            <arg column="answer_json" javaType="java.lang.String"/>
+            <arg column="max_score" javaType="java.math.BigDecimal"/>
+        </constructor>
+    </resultMap>
+    <resultMap id="teacherPendingExamMap" type="com.educore.dashboard.entity.vo.TeacherPendingExamView">
+        <constructor>
+            <idArg column="exam_id" javaType="java.lang.Long"/>
+            <arg column="title" javaType="java.lang.String"/>
+            <arg column="pending_answer_count" javaType="java.lang.Long"/>
+        </constructor>
+    </resultMap>
+
+    <select id="gradeAccess" resultMap="gradeAccessMap">
+        SELECT a.id AS answer_id, a.attempt_id, a.exam_question_id, a.answer_json,
+               q.answer_snapshot AS correct_answer_json, q.type, q.score AS max_score,
+               e.teacher_id, t.status AS attempt_status
+          FROM exam_answer a
+          JOIN exam_attempt t ON t.id = a.attempt_id
+          JOIN exam_question q ON q.id = a.exam_question_id
+          JOIN exam e ON e.id = t.exam_id
+         WHERE a.id = #{answerId}
+    </select>
+    <select id="pendingSubjectiveAnswers" resultMap="pendingExamAnswerMap">
+        SELECT a.id AS answer_id, a.attempt_id, t.student_id, u.real_name AS student_name,
+               q.id AS exam_question_id, q.type, q.content_snapshot AS content,
+               a.answer_json, q.score AS max_score
+          FROM exam_answer a
+          JOIN exam_attempt t ON t.id = a.attempt_id
+          JOIN sys_user u ON u.id = t.student_id
+          JOIN exam_question q ON q.id = a.exam_question_id
+          JOIN exam e ON e.id = t.exam_id
+         WHERE e.id = #{examId}
+           AND e.teacher_id = #{teacherId}
+           AND t.status = 'SUBMITTED'
+           AND q.type = 'SHORT_ANSWER'
+           AND a.score IS NULL
+         ORDER BY t.student_id, q.sort_order
+    </select>
+    <select id="pendingByExamForTeacher" resultMap="teacherPendingExamMap">
+        SELECT e.id AS exam_id, e.title, COUNT(*) AS pending_answer_count
+          FROM exam_answer a
+          JOIN exam_attempt t ON t.id = a.attempt_id
+          JOIN exam_question q ON q.id = a.exam_question_id
+          JOIN exam e ON e.id = t.exam_id
+         WHERE e.teacher_id = #{teacherId}
+           AND t.status = 'SUBMITTED'
+           AND q.type = 'SHORT_ANSWER'
+           AND a.score IS NULL
+         GROUP BY e.id, e.title, e.end_time
+         ORDER BY e.end_time, e.id
+         LIMIT #{limit}
+    </select>
+    <select id="countPendingForTeacher" resultType="long">
+        SELECT COUNT(*)
+          FROM exam_answer a
+          JOIN exam_attempt t ON t.id = a.attempt_id
+          JOIN exam_question q ON q.id = a.exam_question_id
+          JOIN exam e ON e.id = t.exam_id
+         WHERE e.teacher_id = #{teacherId}
+           AND t.status = 'SUBMITTED'
+           AND q.type = 'SHORT_ANSWER'
+           AND a.score IS NULL
+    </select>
+</mapper>

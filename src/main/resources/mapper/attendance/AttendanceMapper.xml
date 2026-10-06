@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.educore.attendance.mapper.AttendanceMapper">
+    <resultMap id="attendanceViewMap" type="com.educore.attendance.entity.vo.AttendanceView">
+        <constructor>
+            <idArg column="id" javaType="java.lang.Long"/>
+            <arg column="schedule_id" javaType="java.lang.Long"/>
+            <arg column="class_id" javaType="java.lang.Long"/>
+            <arg column="class_name" javaType="java.lang.String"/>
+            <arg column="student_id" javaType="java.lang.Long"/>
+            <arg column="student_name" javaType="java.lang.String"/>
+            <arg column="status" javaType="com.educore.attendance.entity.enums.AttendanceStatus"/>
+            <arg column="checked_at" javaType="java.time.LocalDateTime"/>
+        </constructor>
+    </resultMap>
+    <resultMap id="attendanceRosterMap" type="com.educore.attendance.entity.vo.AttendanceRosterView">
+        <constructor>
+            <idArg column="student_id" javaType="java.lang.Long"/>
+            <arg column="real_name" javaType="java.lang.String"/>
+            <arg column="status" javaType="com.educore.attendance.entity.enums.AttendanceStatus"/>
+            <arg column="checked_at" javaType="java.time.LocalDateTime"/>
+        </constructor>
+    </resultMap>
+
+    <insert id="upsertBatch">
+        INSERT INTO attendance(schedule_id, student_id, status, checked_at)
+        VALUES
+        <foreach collection="records" item="row" separator=",">
+            (#{scheduleId}, #{row.studentId}, #{row.status}, CURRENT_TIMESTAMP(3))
+        </foreach>
+        ON DUPLICATE KEY UPDATE
+            status = VALUES(status),
+            checked_at = CURRENT_TIMESTAMP(3),
+            updated_at = CURRENT_TIMESTAMP(3)
+    </insert>
+
+    <select id="studentAttendance" resultMap="attendanceViewMap">
+        SELECT a.id, a.schedule_id, a.student_id, s.class_id, c.name AS class_name,
+               u.real_name AS student_name, a.status, a.checked_at
+          FROM attendance a
+          JOIN class_schedule s ON s.id = a.schedule_id
+          JOIN edu_class c ON c.id = s.class_id
+          JOIN sys_user u ON u.id = a.student_id
+         WHERE a.student_id = #{studentId}
+         ORDER BY a.checked_at DESC, a.id DESC
+    </select>
+    <select id="scheduleRoster" resultMap="attendanceRosterMap">
+        SELECT u.id AS student_id, u.real_name, a.status, a.checked_at
+          FROM class_schedule s
+          JOIN class_student cs ON cs.class_id = s.class_id AND cs.status = 'ENROLLED'
+          JOIN sys_user u ON u.id = cs.student_id
+          LEFT JOIN attendance a ON a.schedule_id = s.id AND a.student_id = cs.student_id
+         WHERE s.id = #{scheduleId}
+         ORDER BY u.id
+    </select>
+</mapper>

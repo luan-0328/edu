@@ -1,6 +1,6 @@
 package com.educore.schedule.entity;
 import com.baomidou.mybatisplus.annotation.*;
-import com.educore.schedule.enums.ScheduleStatus;
+import com.educore.schedule.entity.enums.ScheduleStatus;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;

@@ -9,6 +9,8 @@ const router = useRouter()
 const busy = ref(false)
 const form = reactive({ username: '', password: '' })
 async function submit() {
+  if (busy.value) return
+  if (!form.username.trim() || !form.password) { ElMessage.warning('请输入用户名和密码'); return }
   busy.value = true
   try { await auth.login(form); ElMessage.success(`欢迎回来，${auth.user?.realName || auth.user?.username}`); await router.push('/') }
   finally { busy.value = false }
@@ -28,7 +30,8 @@ async function submit() {
       <el-card class="auth-card" shadow="never">
         <div class="eyebrow muted">WELCOME BACK</div>
         <h2>登录 EduCore</h2>
-        <p class="subtle">使用管理员、教师或学生账号继续。</p>
+        <p class="subtle">使用收到的账号和密码登录，体验不同角色的日常工作。</p>
+        <div class="login-role-guide"><span><strong>管理员</strong>课程、开班与排课</span><span><strong>教师</strong>考勤、作业与考试</span><span><strong>学生</strong>报名、学习与成绩</span></div>
         <el-form :model="form" label-position="top" @submit.prevent="submit">
           <el-form-item label="用户名"><el-input v-model="form.username" size="large" autocomplete="username" placeholder="输入用户名" @keyup.enter="submit" /></el-form-item>
           <el-form-item label="密码"><el-input v-model="form.password" size="large" type="password" show-password autocomplete="current-password" placeholder="输入密码" @keyup.enter="submit" /></el-form-item>

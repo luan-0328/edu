@@ -1,0 +1,15 @@
+.git
+.idea
+target
+!target/
+target/*
+!target/educore-*.jar
+web
+performance
+docs
+scripts
+*.log
+.env
+.env
+.env.*
+!.env.example

@@ -1,6 +1,6 @@
 package com.educore.course.entity;
 import com.baomidou.mybatisplus.annotation.*;
-import com.educore.course.enums.CourseStatus;
+import com.educore.course.entity.enums.CourseStatus;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.math.BigDecimal;

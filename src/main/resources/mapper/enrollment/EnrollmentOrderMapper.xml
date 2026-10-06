@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.educore.enrollment.mapper.EnrollmentOrderMapper">
+    <resultMap id="courseEnrollmentMap" type="com.educore.enrollment.entity.vo.CourseEnrollmentView">
+        <constructor>
+            <arg column="course_id" javaType="java.lang.Long"/>
+            <arg column="class_id" javaType="java.lang.Long"/>
+            <arg column="class_name" javaType="java.lang.String"/>
+            <arg column="status" javaType="java.lang.String"/>
+            <arg column="order_id" javaType="java.lang.Long"/>
+        </constructor>
+    </resultMap>
+    <select id="selectPendingForCourse" resultType="com.educore.enrollment.entity.EnrollmentOrderEntity">
+        SELECT eo.* FROM enrollment_order eo
+          JOIN edu_class ec ON ec.id = eo.class_id
+         WHERE eo.student_id = #{studentId} AND ec.course_id = #{courseId}
+           AND eo.status = 'PENDING' AND eo.expire_at &gt; #{now}
+         ORDER BY eo.id DESC LIMIT 1
+    </select>
+    <select id="selectCourseEnrollmentViews" resultMap="courseEnrollmentMap">
+        SELECT ec.course_id, ec.id AS class_id, ec.name AS class_name,
+               'ENROLLED' AS status, NULL AS order_id
+          FROM class_student cs JOIN edu_class ec ON ec.id = cs.class_id
+         WHERE cs.student_id = #{studentId} AND cs.status = 'ENROLLED'
+           AND ec.status IN ('ENROLLING', 'IN_PROGRESS')
+        UNION ALL
+        SELECT ec.course_id, ec.id AS class_id, ec.name AS class_name,
+               'PENDING' AS status, eo.id AS order_id
+          FROM enrollment_order eo JOIN edu_class ec ON ec.id = eo.class_id
+         WHERE eo.student_id = #{studentId} AND eo.status = 'PENDING'
+           AND eo.expire_at &gt; UTC_TIMESTAMP(3)
+    </select>
+</mapper>
